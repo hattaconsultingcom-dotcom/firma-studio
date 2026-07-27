@@ -28,7 +28,7 @@ export const Route = createFileRoute("/journal/help/$slug")({
 });
 
 function HelpArticleDetail() {
-  const { article: a } = Route.useLoaderData();
+  const { article: a } = Route.useLoaderData() as { article: import("@/lib/public-content").HelpArticle };
   const category = HELP_CATEGORIES.find(c => c.slug === a.category);
   const inCategory = HELP_ARTICLES.filter(x => x.category === a.category);
 

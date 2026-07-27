@@ -31,7 +31,7 @@ export const Route = createFileRoute("/journal/articles/$slug")({
 });
 
 function ArticleDetail() {
-  const { article: a } = Route.useLoaderData();
+  const { article: a } = Route.useLoaderData() as { article: import("@/lib/public-content").Article };
   const related = ARTICLES.filter(x => x.slug !== a.slug && x.section === a.section).slice(0, 3);
   const fallback = ARTICLES.filter(x => x.slug !== a.slug).slice(0, 3);
   const pool = related.length ? related : fallback;

@@ -31,7 +31,7 @@ export const Route = createFileRoute("/journal/case-studies/$slug")({
 });
 
 function CaseStudyDetail() {
-  const { study: s } = Route.useLoaderData();
+  const { study: s } = Route.useLoaderData() as { study: import("@/lib/public-content").CaseStudy };
   const others = CASE_STUDIES.filter(x => x.slug !== s.slug).slice(0, 2);
 
   return (

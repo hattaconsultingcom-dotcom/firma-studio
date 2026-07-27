@@ -35,7 +35,7 @@ const CAT_STYLE: Record<string, string> = {
 };
 
 function ReleaseDetail() {
-  const { release: r } = Route.useLoaderData();
+  const { release: r } = Route.useLoaderData() as { release: import("@/lib/public-content").Release };
   const idx = RELEASES.findIndex(x => x.slug === r.slug);
   const prev = RELEASES[idx + 1];
   const next = RELEASES[idx - 1];

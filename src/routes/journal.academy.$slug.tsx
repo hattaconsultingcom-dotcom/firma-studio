@@ -31,7 +31,7 @@ export const Route = createFileRoute("/journal/academy/$slug")({
 });
 
 function CourseDetail() {
-  const { course: c } = Route.useLoaderData();
+  const { course: c } = Route.useLoaderData() as { course: import("@/lib/public-content").Course };
   const others = COURSES.filter(x => x.slug !== c.slug).slice(0, 3);
 
   return (

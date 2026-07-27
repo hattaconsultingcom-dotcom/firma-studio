@@ -31,7 +31,7 @@ export const Route = createFileRoute("/journal/resources/$slug")({
 });
 
 function ResourceDetail() {
-  const { resource: r } = Route.useLoaderData();
+  const { resource: r } = Route.useLoaderData() as { resource: import("@/lib/public-content").Resource };
   const related = RESOURCES.filter(x => x.slug !== r.slug && x.category === r.category).slice(0, 3);
 
   return (

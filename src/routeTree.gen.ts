@@ -31,8 +31,20 @@ import { Route as ArchitectureRouteImport } from './routes/architecture'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as JournalResourcesRouteImport } from './routes/journal.resources'
+import { Route as JournalHelpRouteImport } from './routes/journal.help'
+import { Route as JournalChangelogRouteImport } from './routes/journal.changelog'
+import { Route as JournalCaseStudiesRouteImport } from './routes/journal.case-studies'
+import { Route as JournalArticlesRouteImport } from './routes/journal.articles'
+import { Route as JournalAcademyRouteImport } from './routes/journal.academy'
 import { Route as JournalSlugRouteImport } from './routes/journal.$slug'
 import { Route as BlogIdRouteImport } from './routes/blog.$id'
+import { Route as JournalResourcesSlugRouteImport } from './routes/journal.resources.$slug'
+import { Route as JournalHelpSlugRouteImport } from './routes/journal.help.$slug'
+import { Route as JournalChangelogSlugRouteImport } from './routes/journal.changelog.$slug'
+import { Route as JournalCaseStudiesSlugRouteImport } from './routes/journal.case-studies.$slug'
+import { Route as JournalArticlesSlugRouteImport } from './routes/journal.articles.$slug'
+import { Route as JournalAcademySlugRouteImport } from './routes/journal.academy.$slug'
 
 const WebsiteRoute = WebsiteRouteImport.update({
   id: '/website',
@@ -144,6 +156,36 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JournalResourcesRoute = JournalResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => JournalRoute,
+} as any)
+const JournalHelpRoute = JournalHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => JournalRoute,
+} as any)
+const JournalChangelogRoute = JournalChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
+  getParentRoute: () => JournalRoute,
+} as any)
+const JournalCaseStudiesRoute = JournalCaseStudiesRouteImport.update({
+  id: '/case-studies',
+  path: '/case-studies',
+  getParentRoute: () => JournalRoute,
+} as any)
+const JournalArticlesRoute = JournalArticlesRouteImport.update({
+  id: '/articles',
+  path: '/articles',
+  getParentRoute: () => JournalRoute,
+} as any)
+const JournalAcademyRoute = JournalAcademyRouteImport.update({
+  id: '/academy',
+  path: '/academy',
+  getParentRoute: () => JournalRoute,
+} as any)
 const JournalSlugRoute = JournalSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -153,6 +195,36 @@ const BlogIdRoute = BlogIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => BlogRoute,
+} as any)
+const JournalResourcesSlugRoute = JournalResourcesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => JournalResourcesRoute,
+} as any)
+const JournalHelpSlugRoute = JournalHelpSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => JournalHelpRoute,
+} as any)
+const JournalChangelogSlugRoute = JournalChangelogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => JournalChangelogRoute,
+} as any)
+const JournalCaseStudiesSlugRoute = JournalCaseStudiesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => JournalCaseStudiesRoute,
+} as any)
+const JournalArticlesSlugRoute = JournalArticlesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => JournalArticlesRoute,
+} as any)
+const JournalAcademySlugRoute = JournalAcademySlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => JournalAcademyRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -180,6 +252,18 @@ export interface FileRoutesByFullPath {
   '/website': typeof WebsiteRoute
   '/blog/$id': typeof BlogIdRoute
   '/journal/$slug': typeof JournalSlugRoute
+  '/journal/academy': typeof JournalAcademyRouteWithChildren
+  '/journal/articles': typeof JournalArticlesRouteWithChildren
+  '/journal/case-studies': typeof JournalCaseStudiesRouteWithChildren
+  '/journal/changelog': typeof JournalChangelogRouteWithChildren
+  '/journal/help': typeof JournalHelpRouteWithChildren
+  '/journal/resources': typeof JournalResourcesRouteWithChildren
+  '/journal/academy/$slug': typeof JournalAcademySlugRoute
+  '/journal/articles/$slug': typeof JournalArticlesSlugRoute
+  '/journal/case-studies/$slug': typeof JournalCaseStudiesSlugRoute
+  '/journal/changelog/$slug': typeof JournalChangelogSlugRoute
+  '/journal/help/$slug': typeof JournalHelpSlugRoute
+  '/journal/resources/$slug': typeof JournalResourcesSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -206,6 +290,18 @@ export interface FileRoutesByTo {
   '/website': typeof WebsiteRoute
   '/blog/$id': typeof BlogIdRoute
   '/journal/$slug': typeof JournalSlugRoute
+  '/journal/academy': typeof JournalAcademyRouteWithChildren
+  '/journal/articles': typeof JournalArticlesRouteWithChildren
+  '/journal/case-studies': typeof JournalCaseStudiesRouteWithChildren
+  '/journal/changelog': typeof JournalChangelogRouteWithChildren
+  '/journal/help': typeof JournalHelpRouteWithChildren
+  '/journal/resources': typeof JournalResourcesRouteWithChildren
+  '/journal/academy/$slug': typeof JournalAcademySlugRoute
+  '/journal/articles/$slug': typeof JournalArticlesSlugRoute
+  '/journal/case-studies/$slug': typeof JournalCaseStudiesSlugRoute
+  '/journal/changelog/$slug': typeof JournalChangelogSlugRoute
+  '/journal/help/$slug': typeof JournalHelpSlugRoute
+  '/journal/resources/$slug': typeof JournalResourcesSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -233,6 +329,18 @@ export interface FileRoutesById {
   '/website': typeof WebsiteRoute
   '/blog/$id': typeof BlogIdRoute
   '/journal/$slug': typeof JournalSlugRoute
+  '/journal/academy': typeof JournalAcademyRouteWithChildren
+  '/journal/articles': typeof JournalArticlesRouteWithChildren
+  '/journal/case-studies': typeof JournalCaseStudiesRouteWithChildren
+  '/journal/changelog': typeof JournalChangelogRouteWithChildren
+  '/journal/help': typeof JournalHelpRouteWithChildren
+  '/journal/resources': typeof JournalResourcesRouteWithChildren
+  '/journal/academy/$slug': typeof JournalAcademySlugRoute
+  '/journal/articles/$slug': typeof JournalArticlesSlugRoute
+  '/journal/case-studies/$slug': typeof JournalCaseStudiesSlugRoute
+  '/journal/changelog/$slug': typeof JournalChangelogSlugRoute
+  '/journal/help/$slug': typeof JournalHelpSlugRoute
+  '/journal/resources/$slug': typeof JournalResourcesSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -261,6 +369,18 @@ export interface FileRouteTypes {
     | '/website'
     | '/blog/$id'
     | '/journal/$slug'
+    | '/journal/academy'
+    | '/journal/articles'
+    | '/journal/case-studies'
+    | '/journal/changelog'
+    | '/journal/help'
+    | '/journal/resources'
+    | '/journal/academy/$slug'
+    | '/journal/articles/$slug'
+    | '/journal/case-studies/$slug'
+    | '/journal/changelog/$slug'
+    | '/journal/help/$slug'
+    | '/journal/resources/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -287,6 +407,18 @@ export interface FileRouteTypes {
     | '/website'
     | '/blog/$id'
     | '/journal/$slug'
+    | '/journal/academy'
+    | '/journal/articles'
+    | '/journal/case-studies'
+    | '/journal/changelog'
+    | '/journal/help'
+    | '/journal/resources'
+    | '/journal/academy/$slug'
+    | '/journal/articles/$slug'
+    | '/journal/case-studies/$slug'
+    | '/journal/changelog/$slug'
+    | '/journal/help/$slug'
+    | '/journal/resources/$slug'
   id:
     | '__root__'
     | '/'
@@ -313,6 +445,18 @@ export interface FileRouteTypes {
     | '/website'
     | '/blog/$id'
     | '/journal/$slug'
+    | '/journal/academy'
+    | '/journal/articles'
+    | '/journal/case-studies'
+    | '/journal/changelog'
+    | '/journal/help'
+    | '/journal/resources'
+    | '/journal/academy/$slug'
+    | '/journal/articles/$slug'
+    | '/journal/case-studies/$slug'
+    | '/journal/changelog/$slug'
+    | '/journal/help/$slug'
+    | '/journal/resources/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -496,6 +640,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/journal/resources': {
+      id: '/journal/resources'
+      path: '/resources'
+      fullPath: '/journal/resources'
+      preLoaderRoute: typeof JournalResourcesRouteImport
+      parentRoute: typeof JournalRoute
+    }
+    '/journal/help': {
+      id: '/journal/help'
+      path: '/help'
+      fullPath: '/journal/help'
+      preLoaderRoute: typeof JournalHelpRouteImport
+      parentRoute: typeof JournalRoute
+    }
+    '/journal/changelog': {
+      id: '/journal/changelog'
+      path: '/changelog'
+      fullPath: '/journal/changelog'
+      preLoaderRoute: typeof JournalChangelogRouteImport
+      parentRoute: typeof JournalRoute
+    }
+    '/journal/case-studies': {
+      id: '/journal/case-studies'
+      path: '/case-studies'
+      fullPath: '/journal/case-studies'
+      preLoaderRoute: typeof JournalCaseStudiesRouteImport
+      parentRoute: typeof JournalRoute
+    }
+    '/journal/articles': {
+      id: '/journal/articles'
+      path: '/articles'
+      fullPath: '/journal/articles'
+      preLoaderRoute: typeof JournalArticlesRouteImport
+      parentRoute: typeof JournalRoute
+    }
+    '/journal/academy': {
+      id: '/journal/academy'
+      path: '/academy'
+      fullPath: '/journal/academy'
+      preLoaderRoute: typeof JournalAcademyRouteImport
+      parentRoute: typeof JournalRoute
+    }
     '/journal/$slug': {
       id: '/journal/$slug'
       path: '/$slug'
@@ -510,6 +696,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogIdRouteImport
       parentRoute: typeof BlogRoute
     }
+    '/journal/resources/$slug': {
+      id: '/journal/resources/$slug'
+      path: '/$slug'
+      fullPath: '/journal/resources/$slug'
+      preLoaderRoute: typeof JournalResourcesSlugRouteImport
+      parentRoute: typeof JournalResourcesRoute
+    }
+    '/journal/help/$slug': {
+      id: '/journal/help/$slug'
+      path: '/$slug'
+      fullPath: '/journal/help/$slug'
+      preLoaderRoute: typeof JournalHelpSlugRouteImport
+      parentRoute: typeof JournalHelpRoute
+    }
+    '/journal/changelog/$slug': {
+      id: '/journal/changelog/$slug'
+      path: '/$slug'
+      fullPath: '/journal/changelog/$slug'
+      preLoaderRoute: typeof JournalChangelogSlugRouteImport
+      parentRoute: typeof JournalChangelogRoute
+    }
+    '/journal/case-studies/$slug': {
+      id: '/journal/case-studies/$slug'
+      path: '/$slug'
+      fullPath: '/journal/case-studies/$slug'
+      preLoaderRoute: typeof JournalCaseStudiesSlugRouteImport
+      parentRoute: typeof JournalCaseStudiesRoute
+    }
+    '/journal/articles/$slug': {
+      id: '/journal/articles/$slug'
+      path: '/$slug'
+      fullPath: '/journal/articles/$slug'
+      preLoaderRoute: typeof JournalArticlesSlugRouteImport
+      parentRoute: typeof JournalArticlesRoute
+    }
+    '/journal/academy/$slug': {
+      id: '/journal/academy/$slug'
+      path: '/$slug'
+      fullPath: '/journal/academy/$slug'
+      preLoaderRoute: typeof JournalAcademySlugRouteImport
+      parentRoute: typeof JournalAcademyRoute
+    }
   }
 }
 
@@ -523,12 +751,93 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
+interface JournalAcademyRouteChildren {
+  JournalAcademySlugRoute: typeof JournalAcademySlugRoute
+}
+
+const JournalAcademyRouteChildren: JournalAcademyRouteChildren = {
+  JournalAcademySlugRoute: JournalAcademySlugRoute,
+}
+
+const JournalAcademyRouteWithChildren = JournalAcademyRoute._addFileChildren(
+  JournalAcademyRouteChildren,
+)
+
+interface JournalArticlesRouteChildren {
+  JournalArticlesSlugRoute: typeof JournalArticlesSlugRoute
+}
+
+const JournalArticlesRouteChildren: JournalArticlesRouteChildren = {
+  JournalArticlesSlugRoute: JournalArticlesSlugRoute,
+}
+
+const JournalArticlesRouteWithChildren = JournalArticlesRoute._addFileChildren(
+  JournalArticlesRouteChildren,
+)
+
+interface JournalCaseStudiesRouteChildren {
+  JournalCaseStudiesSlugRoute: typeof JournalCaseStudiesSlugRoute
+}
+
+const JournalCaseStudiesRouteChildren: JournalCaseStudiesRouteChildren = {
+  JournalCaseStudiesSlugRoute: JournalCaseStudiesSlugRoute,
+}
+
+const JournalCaseStudiesRouteWithChildren =
+  JournalCaseStudiesRoute._addFileChildren(JournalCaseStudiesRouteChildren)
+
+interface JournalChangelogRouteChildren {
+  JournalChangelogSlugRoute: typeof JournalChangelogSlugRoute
+}
+
+const JournalChangelogRouteChildren: JournalChangelogRouteChildren = {
+  JournalChangelogSlugRoute: JournalChangelogSlugRoute,
+}
+
+const JournalChangelogRouteWithChildren =
+  JournalChangelogRoute._addFileChildren(JournalChangelogRouteChildren)
+
+interface JournalHelpRouteChildren {
+  JournalHelpSlugRoute: typeof JournalHelpSlugRoute
+}
+
+const JournalHelpRouteChildren: JournalHelpRouteChildren = {
+  JournalHelpSlugRoute: JournalHelpSlugRoute,
+}
+
+const JournalHelpRouteWithChildren = JournalHelpRoute._addFileChildren(
+  JournalHelpRouteChildren,
+)
+
+interface JournalResourcesRouteChildren {
+  JournalResourcesSlugRoute: typeof JournalResourcesSlugRoute
+}
+
+const JournalResourcesRouteChildren: JournalResourcesRouteChildren = {
+  JournalResourcesSlugRoute: JournalResourcesSlugRoute,
+}
+
+const JournalResourcesRouteWithChildren =
+  JournalResourcesRoute._addFileChildren(JournalResourcesRouteChildren)
+
 interface JournalRouteChildren {
   JournalSlugRoute: typeof JournalSlugRoute
+  JournalAcademyRoute: typeof JournalAcademyRouteWithChildren
+  JournalArticlesRoute: typeof JournalArticlesRouteWithChildren
+  JournalCaseStudiesRoute: typeof JournalCaseStudiesRouteWithChildren
+  JournalChangelogRoute: typeof JournalChangelogRouteWithChildren
+  JournalHelpRoute: typeof JournalHelpRouteWithChildren
+  JournalResourcesRoute: typeof JournalResourcesRouteWithChildren
 }
 
 const JournalRouteChildren: JournalRouteChildren = {
   JournalSlugRoute: JournalSlugRoute,
+  JournalAcademyRoute: JournalAcademyRouteWithChildren,
+  JournalArticlesRoute: JournalArticlesRouteWithChildren,
+  JournalCaseStudiesRoute: JournalCaseStudiesRouteWithChildren,
+  JournalChangelogRoute: JournalChangelogRouteWithChildren,
+  JournalHelpRoute: JournalHelpRouteWithChildren,
+  JournalResourcesRoute: JournalResourcesRouteWithChildren,
 }
 
 const JournalRouteWithChildren =
