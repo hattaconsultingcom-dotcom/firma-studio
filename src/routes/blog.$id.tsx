@@ -1,34 +1,404 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ARTICLES, AUTHORS, CATEGORIES, LANGS, authorById } from "@/lib/mock";
+import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
+import {
+  ChevronLeft, Eye, Save, MoreHorizontal, Trash2, Send, Archive, RotateCcw,
+  Bold, Italic, Heading1, Heading2, List, ListOrdered, Quote, Code,
+  Image as ImageIcon, Link2, Table as TableIcon, Upload, Loader2, AlertCircle, X,
+} from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { supabase, slugify, calculateReadingTime, type ArticleStatus, type AuthorRow, type CategoryRow, type TagRow } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth";
 import { StatusBadge } from "@/components/studio/StatusBadge";
 import {
-  ChevronLeft, Eye, Calendar, MoreHorizontal, Save, Bold, Italic, Heading1, Heading2,
-  List, ListOrdered, Quote, Code, Image as ImageIcon, Link2, Table as TableIcon,
-  CheckCircle2, XCircle, AlertTriangle, Info,
-} from "lucide-react";
-import { useState } from "react";
+  AlertDialog,
+  AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/blog/$id")({
-  loader: ({ params }) => {
-    const article = ARTICLES.find((a) => a.id === params.id);
-    if (!article) throw notFound();
-    return article;
-  },
-  head: ({ loaderData }) => ({
+  head: () => ({
     meta: [
-      { title: `${loaderData?.title ?? "Article"} · FIRMA Studio` },
+      { title: "Edit article · FIRMA Studio" },
       { name: "description", content: "Edit article in FIRMA Studio." },
     ],
   }),
   component: Editor,
 });
 
-type Tab = "general" | "seo" | "social" | "schema" | "localization" | "relations";
+type Tab = "general" | "seo" | "social";
+type FormState = {
+  headline: string;
+  slug: string;
+  excerpt: string;
+  body: string;
+  featured_image_url: string;
+  featured_image_alt: string;
+  author_id: string;
+  category_id: string;
+  status: ArticleStatus;
+  publish_date: string;
+  reading_time: number;
+  meta_title: string;
+  meta_description: string;
+  canonical_url: string;
+  og_title: string;
+  og_description: string;
+  og_image_url: string;
+  no_index: boolean;
+  no_follow: boolean;
+};
+
+const EMPTY_FORM: FormState = {
+  headline: "",
+  slug: "",
+  excerpt: "",
+  body: "",
+  featured_image_url: "",
+  featured_image_alt: "",
+  author_id: "",
+  category_id: "",
+  status: "draft",
+  publish_date: "",
+  reading_time: 0,
+  meta_title: "",
+  meta_description: "",
+  canonical_url: "",
+  og_title: "",
+  og_description: "",
+  og_image_url: "",
+  no_index: false,
+  no_follow: false,
+};
 
 function Editor() {
-  const article = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const navigate = useNavigate();
+  const isNew = id === "new";
+
   const [tab, setTab] = useState<Tab>("general");
-  const author = authorById(article.author);
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [authors, setAuthors] = useState<AuthorRow[]>([]);
+  const [categories, setCategories] = useState<CategoryRow[]>([]);
+  const [tags, setTags] = useState<TagRow[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [loading, setLoading] = useState(!isNew);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [slugError, setSlugError] = useState<string | null>(null);
+  const [slugEdited, setSlugEdited] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [articleId, setArticleId] = useState<string | null>(isNew ? null : id);
+
+  const showToast = useCallback((msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  }, []);
+
+  const loadArticle = useCallback(async () => {
+    if (isNew) return;
+    setLoading(true);
+    const { data, error: queryError } = await supabase
+      .from("articles")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (queryError || !data) {
+      setError(queryError?.message ?? "Article not found");
+      setLoading(false);
+      return;
+    }
+
+    const a = data as FormState & { id: string };
+    setForm({
+      headline: a.headline,
+      slug: a.slug,
+      excerpt: a.excerpt ?? "",
+      body: a.body ?? "",
+      featured_image_url: a.featured_image_url ?? "",
+      featured_image_alt: a.featured_image_alt ?? "",
+      author_id: a.author_id ?? "",
+      category_id: a.category_id ?? "",
+      status: a.status,
+      publish_date: a.publish_date ? new Date(a.publish_date).toISOString().slice(0, 16) : "",
+      reading_time: a.reading_time,
+      meta_title: a.meta_title ?? "",
+      meta_description: a.meta_description ?? "",
+      canonical_url: a.canonical_url ?? "",
+      og_title: a.og_title ?? "",
+      og_description: a.og_description ?? "",
+      og_image_url: a.og_image_url ?? "",
+      no_index: a.no_index,
+      no_follow: a.no_follow,
+    });
+
+    const { data: tagLinks } = await supabase
+      .from("article_tags")
+      .select("tag_id")
+      .eq("article_id", id);
+    if (tagLinks) {
+      setSelectedTags(tagLinks.map((t: { tag_id: string }) => t.tag_id));
+    }
+    setArticleId(id);
+    setLoading(false);
+  }, [id, isNew]);
+
+  useEffect(() => {
+    async function loadTaxonomy() {
+      const [{ data: a }, { data: c }, { data: t }] = await Promise.all([
+        supabase.from("authors").select("*").order("name"),
+        supabase.from("categories").select("*").order("name"),
+        supabase.from("tags").select("*").order("name"),
+      ]);
+      if (a) setAuthors(a as AuthorRow[]);
+      if (c) setCategories(c as CategoryRow[]);
+      if (t) setTags(t as TagRow[]);
+    }
+    loadTaxonomy();
+    loadArticle();
+  }, [loadArticle]);
+
+  function update<K extends keyof FormState>(key: K, value: FormState[K]) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function onHeadlineChange(val: string) {
+    update("headline", val);
+    if (!slugEdited) {
+      update("slug", slugify(val));
+    }
+  }
+
+  async function checkSlugUnique(slug: string, excludeId?: string): Promise<boolean> {
+    let query = supabase.from("articles").select("id").eq("slug", slug);
+    if (excludeId) {
+      query = query.neq("id", excludeId);
+    }
+    const { data } = await query.maybeSingle();
+    return !data;
+  }
+
+  async function handleSave(targetStatus?: ArticleStatus) {
+    setError(null);
+    setSlugError(null);
+
+    if (!form.headline.trim()) {
+      setError("Headline is required.");
+      return;
+    }
+    if (!form.slug.trim()) {
+      setSlugError("Slug is required.");
+      return;
+    }
+
+    const isUnique = await checkSlugUnique(form.slug, articleId ?? undefined);
+    if (!isUnique) {
+      setSlugError("This slug is already in use by another article. Choose a different one.");
+      return;
+    }
+
+    setSaving(true);
+    const status = targetStatus ?? form.status;
+    const publishDate = status === "published" && !form.publish_date
+      ? new Date().toISOString()
+      : form.publish_date
+        ? new Date(form.publish_date).toISOString()
+        : null;
+
+    const payload = {
+      headline: form.headline,
+      slug: form.slug,
+      excerpt: form.excerpt || null,
+      body: form.body || null,
+      featured_image_url: form.featured_image_url || null,
+      featured_image_alt: form.featured_image_alt || null,
+      author_id: form.author_id || null,
+      category_id: form.category_id || null,
+      status,
+      publish_date: publishDate,
+      reading_time: calculateReadingTime(form.body || ""),
+      meta_title: form.meta_title || null,
+      meta_description: form.meta_description || null,
+      canonical_url: form.canonical_url || null,
+      og_title: form.og_title || null,
+      og_description: form.og_description || null,
+      og_image_url: form.og_image_url || null,
+      no_index: form.no_index,
+      no_follow: form.no_follow,
+    };
+
+    let resultId = articleId;
+
+    if (resultId) {
+      const { error: updateError } = await supabase
+        .from("articles")
+        .update(payload)
+        .eq("id", resultId);
+      if (updateError) {
+        setError(updateError.message);
+        setSaving(false);
+        return;
+      }
+    } else {
+      const { data, error: insertError } = await supabase
+        .from("articles")
+        .insert(payload)
+        .select("id")
+        .single();
+      if (insertError || !data) {
+        setError(insertError?.message ?? "Failed to create article.");
+        setSaving(false);
+        return;
+      }
+      resultId = data.id;
+      setArticleId(data.id);
+    }
+
+    // Sync tags
+    await supabase.from("article_tags").delete().eq("article_id", resultId);
+    if (selectedTags.length > 0) {
+      const tagRows = selectedTags.map((tagId) => ({ article_id: resultId, tag_id: tagId }));
+      await supabase.from("article_tags").insert(tagRows);
+    }
+
+    update("status", status);
+    setSaving(false);
+    showToast(
+      status === "published" ? "Article published." :
+      status === "archived" ? "Article archived." :
+      "Draft saved.",
+    );
+
+    if (isNew && resultId) {
+      navigate({ to: "/blog/$id", params: { id: resultId }, replace: true });
+    }
+  }
+
+  async function handleDelete() {
+    if (!articleId) return;
+    setSaving(true);
+    const { error: deleteError } = await supabase.from("articles").delete().eq("id", articleId);
+    setSaving(false);
+    setDeleteOpen(false);
+    if (deleteError) {
+      setError(deleteError.message);
+      return;
+    }
+    navigate({ to: "/blog" });
+  }
+
+  async function handleUpload(file: File) {
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!allowed.includes(file.type)) {
+      setError("Only JPEG, PNG, WebP and GIF images are allowed.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be under 5 MB.");
+      return;
+    }
+
+    setUploading(true);
+    setError(null);
+    const ext = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const filePath = `featured/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("article-images")
+      .upload(filePath, file);
+
+    if (uploadError) {
+      setError(uploadError.message);
+      setUploading(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("article-images")
+      .getPublicUrl(filePath);
+
+    update("featured_image_url", urlData.publicUrl);
+    if (!form.og_image_url) {
+      update("og_image_url", urlData.publicUrl);
+    }
+    setUploading(false);
+    showToast("Image uploaded.");
+  }
+
+  async function createAuthor(name: string) {
+    const slug = slugify(name);
+    const { data, error: insertError } = await supabase
+      .from("authors")
+      .insert({ name, slug })
+      .select()
+      .single();
+    if (insertError) {
+      setError(insertError.message);
+      return;
+    }
+    if (data) {
+      setAuthors((prev) => [...prev, data as AuthorRow]);
+      update("author_id", data.id);
+    }
+  }
+
+  async function createCategory(name: string) {
+    const slug = slugify(name);
+    const { data, error: insertError } = await supabase
+      .from("categories")
+      .insert({ name, slug })
+      .select()
+      .single();
+    if (insertError) {
+      setError(insertError.message);
+      return;
+    }
+    if (data) {
+      setCategories((prev) => [...prev, data as CategoryRow]);
+      update("category_id", data.id);
+    }
+  }
+
+  async function createTag(name: string) {
+    const slug = slugify(name);
+    const { data, error: insertError } = await supabase
+      .from("tags")
+      .insert({ name, slug })
+      .select()
+      .single();
+    if (insertError) {
+      setError(insertError.message);
+      return;
+    }
+    if (data) {
+      setTags((prev) => [...prev, data as TagRow]);
+      setSelectedTags((prev) => [...prev, data.id]);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-sm text-muted-foreground">Loading article…</span>
+      </div>
+    );
+  }
+
+  if (error && !form.headline && !isNew) {
+    return (
+      <div className="surface-card mx-auto max-w-lg p-8 text-center">
+        <AlertCircle className="mx-auto h-8 w-8 text-destructive" />
+        <h2 className="h-display mt-3 text-xl">Article not found</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{error}</p>
+        <Link to="/blog" className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-4 py-2 text-sm hover:bg-muted">
+          <ChevronLeft className="h-4 w-4" /> Back to blog
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-56px)] flex-col">
@@ -36,31 +406,98 @@ function Editor() {
       <div className="sticky top-14 z-30 border-b border-border bg-background/85 backdrop-blur">
         <div className="mx-auto grid max-w-[1400px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 sm:px-6">
           <div className="flex min-w-0 items-center gap-2">
-            <Link to="/blog" className="p-1.5 rounded-md hover:bg-muted">
+            <Link to="/blog" className="rounded-md p-1.5 hover:bg-muted">
               <ChevronLeft className="h-4 w-4" />
             </Link>
             <div className="min-w-0">
-              <div className="truncate text-sm font-medium">{article.title}</div>
+              <div className="truncate text-sm font-medium">{form.headline || "Untitled"}</div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <StatusBadge status={article.status} />
-                <span className="inline-flex items-center gap-1"><Save className="h-3 w-3" /> Saved just now</span>
+                <StatusBadge status={form.status} />
+                <span className="inline-flex items-center gap-1"><Save className="h-3 w-3" /> Auto-save off</span>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="hidden sm:inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm hover:bg-muted">
-              <Eye className="h-4 w-4" /> Preview
+            {form.status === "published" && (
+              <a
+                href={`/journal/articles/${form.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="hidden sm:inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm hover:bg-muted"
+              >
+                <Eye className="h-4 w-4" /> Preview
+              </a>
+            )}
+            {form.status === "archived" ? (
+              <button
+                onClick={() => handleSave("draft")}
+                disabled={saving}
+                className="hidden sm:inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm hover:bg-muted"
+              >
+                <RotateCcw className="h-4 w-4" /> Restore to Draft
+              </button>
+            ) : form.status === "published" ? (
+              <button
+                onClick={() => handleSave("draft")}
+                disabled={saving}
+                className="hidden sm:inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm hover:bg-muted"
+              >
+                <RotateCcw className="h-4 w-4" /> Unpublish
+              </button>
+            ) : null}
+            <button
+              onClick={() => handleSave("draft")}
+              disabled={saving}
+              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm hover:bg-muted"
+            >
+              <Save className="h-4 w-4" /> Save Draft
             </button>
-            <button className="hidden sm:inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm hover:bg-muted">
-              <Calendar className="h-4 w-4" /> Schedule
+            {form.status !== "published" ? (
+              <button
+                onClick={() => handleSave("published")}
+                disabled={saving}
+                className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:opacity-95"
+              >
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                Publish
+              </button>
+            ) : (
+              <button
+                onClick={() => handleSave("archived")}
+                disabled={saving}
+                className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm hover:bg-muted"
+              >
+                <Archive className="h-4 w-4" /> Archive
+              </button>
+            )}
+            <button
+              onClick={() => setDeleteOpen(true)}
+              className="rounded-md p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+              title="Delete"
+            >
+              <Trash2 className="h-4 w-4" />
             </button>
-            <button className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:opacity-95">
-              Publish
-            </button>
-            <button className="p-2 rounded-md hover:bg-muted"><MoreHorizontal className="h-4 w-4" /></button>
           </div>
         </div>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm shadow-lg">
+          {toast}
+        </div>
+      )}
+
+      {/* Error banner */}
+      {(error || slugError) && (
+        <div className="mx-auto mt-3 flex w-full max-w-[1400px] items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>{error || slugError}</span>
+          <button onClick={() => { setError(null); setSlugError(null); }} className="ml-auto">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       <div className="mx-auto grid w-full max-w-[1400px] flex-1 grid-cols-1 gap-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_380px] sm:px-6">
         {/* Main editor */}
@@ -69,64 +506,73 @@ function Editor() {
             {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-0.5 border-b border-border px-2 py-1.5">
               {[Bold, Italic, Heading1, Heading2, List, ListOrdered, Quote, Code, ImageIcon, Link2, TableIcon].map((I, i) => (
-                <button key={i} className="grid h-8 w-8 place-items-center rounded hover:bg-muted text-muted-foreground hover:text-foreground">
+                <button key={i} className="grid h-8 w-8 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-foreground">
                   <I className="h-4 w-4" />
                 </button>
               ))}
-              <div className="ml-auto text-xs text-muted-foreground pr-1">~1,240 words · 5 min read</div>
+              <div className="ml-auto pr-1 text-xs text-muted-foreground">
+                {calculateReadingTime(form.body || "")} min read · {(form.body || "").trim().split(/\s+/).filter(Boolean).length} words
+              </div>
             </div>
 
             {/* Cover */}
-            <div className="relative">
-              <img src={article.cover} alt="" className="h-52 w-full object-cover" />
-              <button className="absolute right-3 top-3 rounded-md border border-border bg-card/95 px-2.5 py-1 text-xs hover:bg-card">
-                Replace cover
-              </button>
-            </div>
+            {form.featured_image_url ? (
+              <div className="relative">
+                <img src={form.featured_image_url} alt={form.featured_image_alt ?? ""} className="h-52 w-full object-cover" />
+                <button
+                  onClick={() => update("featured_image_url", "")}
+                  className="absolute right-3 top-3 rounded-md border border-border bg-card/95 px-2.5 py-1 text-xs hover:bg-card"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <label className="flex h-52 cursor-pointer items-center justify-center border-b border-border bg-muted/30 hover:bg-muted/50">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleUpload(file);
+                  }}
+                />
+                {uploading ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Uploading…
+                  </div>
+                ) : (
+                  <div className="text-center text-sm text-muted-foreground">
+                    <Upload className="mx-auto h-6 w-6" />
+                    <div className="mt-2">Upload featured image</div>
+                  </div>
+                )}
+              </label>
+            )}
 
             {/* Content */}
             <div className="px-6 py-8 sm:px-10">
               <input
-                defaultValue={article.title}
-                className="w-full border-0 bg-transparent text-3xl sm:text-4xl font-display font-normal tracking-[-0.028em] leading-tight text-foreground focus:outline-none"
+                value={form.headline}
+                onChange={(e) => onHeadlineChange(e.target.value)}
+                placeholder="Article headline"
+                className="w-full border-0 bg-transparent text-3xl font-display font-normal tracking-[-0.028em] leading-tight text-foreground focus:outline-none sm:text-4xl"
               />
               <textarea
-                defaultValue={article.excerpt}
+                value={form.excerpt}
+                onChange={(e) => update("excerpt", e.target.value)}
+                placeholder="Excerpt — a short summary shown in listings and search results"
                 rows={2}
                 className="mt-4 w-full resize-none border-0 bg-transparent text-lg leading-relaxed text-muted-foreground focus:outline-none"
               />
               <hr className="my-6 border-border" />
-              <article className="prose prose-slate max-w-none text-[15px] leading-7 text-foreground">
-                <p>
-                  Running a profitable microgreens operation at small scale is less about equipment and more
-                  about turnover. In this piece we walk through the unit economics of a 40 m² room producing
-                  three trays per day, with realistic COGS and a chef-focused wholesale price.
-                </p>
-                <h2 className="mt-8 text-xl font-display font-normal tracking-[-0.02em]">1. What you actually spend</h2>
-                <p>
-                  Fixed costs — rent, lights and shelving amortisation — are usually 60–70% of monthly outflow.
-                  Variable costs (seed, media, packaging) scale with tray count. The good news: they are highly
-                  predictable once you stabilise your rotation.
-                </p>
-                <div className="my-5 rounded-md border border-primary/20 bg-primary-soft/60 p-4">
-                  <div className="mono-label mb-1 text-primary">Callout</div>
-                  <p className="m-0 text-sm text-foreground">
-                    <strong>Rule of thumb:</strong> under 3 harvests/week per tray family, your rent-to-revenue
-                    ratio should stay under 22%.
-                  </p>
-                </div>
-                <h2 className="mt-8 text-xl font-display font-normal tracking-[-0.02em]">2. Pricing to chefs</h2>
-                <p>
-                  Restaurant buyers care about consistency more than price. A stable weekly delivery at €14–€16
-                  per 100g wins over an occasional discount to €11.
-                </p>
-                <ul>
-                  <li>Deliver twice a week to reduce chef inventory risk.</li>
-                  <li>Standardise packaging to keep receiving fast.</li>
-                  <li>Sell an "assorted box" for exploration weeks.</li>
-                </ul>
-                <p className="text-muted-foreground italic mt-6">Continue writing…</p>
-              </article>
+              <textarea
+                value={form.body}
+                onChange={(e) => update("body", e.target.value)}
+                placeholder="Write your article body…"
+                rows={20}
+                className="w-full resize-y border-0 bg-transparent text-[15px] leading-7 text-foreground focus:outline-none"
+              />
             </div>
           </div>
         </div>
@@ -135,12 +581,12 @@ function Editor() {
         <aside className="min-w-0">
           <div className="surface-card sticky top-32">
             <div className="flex flex-wrap items-center gap-0.5 border-b border-border p-1.5">
-              {(["general", "seo", "social", "schema", "localization", "relations"] as Tab[]).map((t) => (
+              {(["general", "seo", "social"] as Tab[]).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
                   className={`rounded-md px-2.5 py-1.5 text-xs capitalize transition ${
-                    tab === t ? "bg-primary-soft text-primary font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    tab === t ? "bg-primary-soft font-medium text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                 >
                   {t}
@@ -148,252 +594,313 @@ function Editor() {
               ))}
             </div>
             <div className="p-4">
-              {tab === "general" && <GeneralPanel article={article} authorName={author.name} />}
-              {tab === "seo" && <SeoPanel article={article} />}
-              {tab === "social" && <SocialPanel article={article} />}
-              {tab === "schema" && <SchemaPanel article={article} />}
-              {tab === "localization" && <LocalizationPanel />}
-              {tab === "relations" && <RelationsPanel />}
+              {tab === "general" && (
+                <GeneralPanel
+                  form={form}
+                  authors={authors}
+                  categories={categories}
+                  tags={tags}
+                  selectedTags={selectedTags}
+                  slugError={slugError}
+                  slugEdited={slugEdited}
+                  onUpdate={update}
+                  onSlugEdit={(v) => { setSlugEdited(true); update("slug", v); }}
+                  onToggleTag={(tagId) => {
+                    setSelectedTags((prev) =>
+                      prev.includes(tagId) ? prev.filter((t) => t !== tagId) : [...prev, tagId],
+                    );
+                  }}
+                  onCreateAuthor={createAuthor}
+                  onCreateCategory={createCategory}
+                  onCreateTag={createTag}
+                />
+              )}
+              {tab === "seo" && <SeoPanel form={form} onUpdate={update} />}
+              {tab === "social" && <SocialPanel form={form} onUpdate={update} />}
             </div>
           </div>
         </aside>
       </div>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this article?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The article and all its data will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
 
-function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
+const inputCls = "w-full h-9 rounded-md border border-border bg-card px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30";
+
+function Field({ label, children, hint, error }: { label: string; children: React.ReactNode; hint?: string; error?: string }) {
   return (
     <label className="block space-y-1.5">
       <div className="mono-label">{label}</div>
       {children}
-      {hint && <div className="text-[11px] text-muted-foreground">{hint}</div>}
+      {error ? (
+        <div className="text-[11px] text-destructive">{error}</div>
+      ) : hint ? (
+        <div className="text-[11px] text-muted-foreground">{hint}</div>
+      ) : null}
     </label>
   );
 }
 
-const inputCls =
-  "w-full h-9 rounded-md border border-border bg-card px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30";
+function GeneralPanel({
+  form, authors, categories, tags, selectedTags, slugError, slugEdited,
+  onUpdate, onSlugEdit, onToggleTag, onCreateAuthor, onCreateCategory, onCreateTag,
+}: {
+  form: FormState;
+  authors: AuthorRow[];
+  categories: CategoryRow[];
+  tags: TagRow[];
+  selectedTags: string[];
+  slugError: string | null;
+  slugEdited: boolean;
+  onUpdate: <K extends keyof FormState>(key: K, value: FormState[K]) => void;
+  onSlugEdit: (v: string) => void;
+  onToggleTag: (tagId: string) => void;
+  onCreateAuthor: (name: string) => void;
+  onCreateCategory: (name: string) => void;
+  onCreateTag: (name: string) => void;
+}) {
+  const [newAuthor, setNewAuthor] = useState("");
+  const [newCategory, setNewCategory] = useState("");
+  const [newTag, setNewTag] = useState("");
 
-function GeneralPanel({ article, authorName }: { article: any; authorName: string }) {
   return (
     <div className="space-y-4">
-      <Field label="Slug"><input className={inputCls} defaultValue={article.slug} /></Field>
+      <Field label="Slug" error={slugError ?? undefined} hint={slugEdited ? "Manually edited" : "Auto-generated from headline"}>
+        <input
+          value={form.slug}
+          onChange={(e) => onSlugEdit(slugify(e.target.value))}
+          className={inputCls}
+          placeholder="article-slug"
+        />
+      </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Author">
-          <select className={inputCls} defaultValue={article.author}>
-            {AUTHORS.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-          </select>
+          <div className="space-y-1.5">
+            <select
+              className={inputCls}
+              value={form.author_id}
+              onChange={(e) => onUpdate("author_id", e.target.value)}
+            >
+              <option value="">—</option>
+              {authors.map((a) => (
+                <option key={a.id} value={a.id}>{a.name}</option>
+              ))}
+            </select>
+            <div className="flex gap-1">
+              <input
+                value={newAuthor}
+                onChange={(e) => setNewAuthor(e.target.value)}
+                placeholder="New author…"
+                className="h-7 flex-1 rounded border border-border bg-card px-2 text-xs"
+              />
+              <button
+                onClick={() => { if (newAuthor.trim()) { onCreateAuthor(newAuthor.trim()); setNewAuthor(""); } }}
+                className="rounded border border-border bg-card px-2 text-xs hover:bg-muted"
+              >
+                Add
+              </button>
+            </div>
+          </div>
         </Field>
         <Field label="Category">
-          <select className={inputCls} defaultValue={article.category}>
-            {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-          </select>
+          <div className="space-y-1.5">
+            <select
+              className={inputCls}
+              value={form.category_id}
+              onChange={(e) => onUpdate("category_id", e.target.value)}
+            >
+              <option value="">—</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+            <div className="flex gap-1">
+              <input
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                placeholder="New category…"
+                className="h-7 flex-1 rounded border border-border bg-card px-2 text-xs"
+              />
+              <button
+                onClick={() => { if (newCategory.trim()) { onCreateCategory(newCategory.trim()); setNewCategory(""); } }}
+                className="rounded border border-border bg-card px-2 text-xs hover:bg-muted"
+              >
+                Add
+              </button>
+            </div>
+          </div>
         </Field>
       </div>
-      <Field label="Tags"><input className={inputCls} defaultValue={article.tags.join(", ")} /></Field>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Language">
-          <select className={inputCls} defaultValue={article.language}>
-            {LANGS.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
-          </select>
-        </Field>
-        <Field label="Status">
-          <select className={inputCls} defaultValue={article.status}>
-            <option value="draft">Draft</option>
-            <option value="in_review">In Review</option>
-            <option value="approved">Approved</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="published">Published</option>
-          </select>
-        </Field>
-      </div>
-      <Field label="Publish date"><input type="datetime-local" className={inputCls} /></Field>
-      <Field label="Canonical URL"><input className={inputCls} placeholder={`https://firma.farm/blog/${article.slug}`} /></Field>
+      <Field label="Tags">
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-1.5">
+            {tags.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => onToggleTag(t.id)}
+                className={`rounded-full border px-2.5 py-1 text-xs transition ${
+                  selectedTags.includes(t.id)
+                    ? "border-primary bg-primary-soft text-primary"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t.name}
+              </button>
+            ))}
+            {tags.length === 0 && <span className="text-xs text-muted-foreground">No tags yet.</span>}
+          </div>
+          <div className="flex gap-1">
+            <input
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              placeholder="New tag…"
+              className="h-7 flex-1 rounded border border-border bg-card px-2 text-xs"
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); if (newTag.trim()) { onCreateTag(newTag.trim()); setNewTag(""); } } }}
+            />
+            <button
+              onClick={() => { if (newTag.trim()) { onCreateTag(newTag.trim()); setNewTag(""); } }}
+              className="rounded border border-border bg-card px-2 text-xs hover:bg-muted"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      </Field>
+      <Field label="Publish date">
+        <input
+          type="datetime-local"
+          className={inputCls}
+          value={form.publish_date}
+          onChange={(e) => onUpdate("publish_date", e.target.value)}
+        />
+      </Field>
+      <Field label="Featured image alt text">
+        <input
+          className={inputCls}
+          value={form.featured_image_alt}
+          onChange={(e) => onUpdate("featured_image_alt", e.target.value)}
+          placeholder="Describe the image for accessibility"
+        />
+      </Field>
+    </div>
+  );
+}
+
+function SeoPanel({ form, onUpdate }: { form: FormState; onUpdate: <K extends keyof FormState>(key: K, value: FormState[K]) => void }) {
+  return (
+    <div className="space-y-4">
+      <Field label="Meta title" hint={`${form.meta_title.length} / 60`}>
+        <input
+          className={inputCls}
+          value={form.meta_title}
+          onChange={(e) => onUpdate("meta_title", e.target.value)}
+          placeholder={`${form.headline} · FIRMA`}
+        />
+      </Field>
+      <Field label="Meta description" hint={`${form.meta_description.length} / 160`}>
+        <textarea
+          className="w-full min-h-[80px] rounded-md border border-border bg-card p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+          value={form.meta_description}
+          onChange={(e) => onUpdate("meta_description", e.target.value)}
+          placeholder={form.excerpt}
+        />
+      </Field>
+      <Field label="Canonical URL">
+        <input
+          className={inputCls}
+          value={form.canonical_url}
+          onChange={(e) => onUpdate("canonical_url", e.target.value)}
+          placeholder={`https://firma.farm/journal/articles/${form.slug}`}
+        />
+      </Field>
       <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2 text-sm">
         <span>NoIndex</span>
-        <input type="checkbox" className="h-4 w-4 accent-[var(--primary)]" />
+        <input
+          type="checkbox"
+          checked={form.no_index}
+          onChange={(e) => onUpdate("no_index", e.target.checked)}
+          className="h-4 w-4 accent-[var(--primary)]"
+        />
       </div>
       <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2 text-sm">
         <span>NoFollow</span>
-        <input type="checkbox" className="h-4 w-4 accent-[var(--primary)]" />
+        <input
+          type="checkbox"
+          checked={form.no_follow}
+          onChange={(e) => onUpdate("no_follow", e.target.checked)}
+          className="h-4 w-4 accent-[var(--primary)]"
+        />
       </div>
-      <div className="text-xs text-muted-foreground">Author currently: {authorName}</div>
+      <div className="rounded-md border border-warn/30 bg-warn/10 p-2.5 text-xs text-muted-foreground">
+        Advanced SEO audit, structured data and FAQ schema are Coming Soon.
+      </div>
     </div>
   );
 }
 
-function SeoPanel({ article }: { article: any }) {
-  const checks = [
-    { ok: true, label: "Meta title within 60 characters" },
-    { ok: true, label: "Meta description within 160 characters" },
-    { ok: false, label: "Focus keyword appears in H1" },
-    { ok: false, label: "3 images missing alt text" },
-    { ok: true, label: "Reading grade appropriate (Grade 8)" },
-    { ok: true, label: "At least 2 internal links" },
-  ];
+function SocialPanel({ form, onUpdate }: { form: FormState; onUpdate: <K extends keyof FormState>(key: K, value: FormState[K]) => void }) {
   return (
     <div className="space-y-4">
-      <Field label="Focus keyword"><input className={inputCls} defaultValue="microgreens business plan" /></Field>
-      <Field label="Meta title" hint="55 / 60"><input className={inputCls} defaultValue={`${article.title} · FIRMA`} /></Field>
-      <Field label="Meta description" hint="152 / 160">
-        <textarea className="w-full min-h-[80px] rounded-md border border-border bg-card p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30" defaultValue={article.excerpt} />
+      <Field label="Open Graph title">
+        <input
+          className={inputCls}
+          value={form.og_title}
+          onChange={(e) => onUpdate("og_title", e.target.value)}
+          placeholder={form.headline}
+        />
       </Field>
-
-      <div className="rounded-md border border-border p-3">
-        <div className="mono-label mb-2">Search preview</div>
-        <div className="text-[13px] text-info truncate">firma.farm › blog › {article.slug}</div>
-        <div className="text-[15px] text-[#1a0dab] leading-snug line-clamp-2">{article.title} · FIRMA</div>
-        <div className="text-[13px] text-muted-foreground line-clamp-2">{article.excerpt}</div>
-      </div>
-
-      <div>
-        <div className="mono-label mb-2">SEO checklist</div>
-        <ul className="space-y-1.5">
-          {checks.map((c, i) => (
-            <li key={i} className="flex items-center gap-2 text-xs">
-              {c.ok ? <CheckCircle2 className="h-3.5 w-3.5 text-success" /> : <XCircle className="h-3.5 w-3.5 text-destructive" />}
-              <span className={c.ok ? "text-foreground" : "text-muted-foreground"}>{c.label}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-function SocialPanel({ article }: { article: any }) {
-  return (
-    <div className="space-y-4">
-      <Field label="Open Graph title"><input className={inputCls} defaultValue={article.title} /></Field>
       <Field label="Open Graph description">
-        <textarea className="w-full min-h-[70px] rounded-md border border-border bg-card p-2.5 text-sm" defaultValue={article.excerpt} />
+        <textarea
+          className="w-full min-h-[70px] rounded-md border border-border bg-card p-2.5 text-sm"
+          value={form.og_description}
+          onChange={(e) => onUpdate("og_description", e.target.value)}
+          placeholder={form.excerpt}
+        />
       </Field>
       <Field label="Open Graph image">
-        <div className="overflow-hidden rounded-md border border-border">
-          <img src={article.cover} alt="" className="h-32 w-full object-cover" />
-        </div>
+        <input
+          className={inputCls}
+          value={form.og_image_url}
+          onChange={(e) => onUpdate("og_image_url", e.target.value)}
+          placeholder={form.featured_image_url}
+        />
       </Field>
-
-      <div className="rounded-md border border-border p-3">
-        <div className="mono-label mb-2">X / Twitter preview</div>
+      {form.og_image_url && (
         <div className="overflow-hidden rounded-md border border-border">
-          <img src={article.cover} alt="" className="h-24 w-full object-cover" />
-          <div className="p-2.5 bg-card">
+          <img src={form.og_image_url} alt="" className="h-32 w-full object-cover" />
+        </div>
+      )}
+      <div className="rounded-md border border-border p-3">
+        <div className="mono-label mb-2">Preview</div>
+        <div className="overflow-hidden rounded-md border border-border">
+          {form.og_image_url && <img src={form.og_image_url} alt="" className="h-24 w-full object-cover" />}
+          <div className="bg-card p-2.5">
             <div className="text-[11px] text-muted-foreground">firma.farm</div>
-            <div className="text-sm font-medium line-clamp-1">{article.title}</div>
-            <div className="text-xs text-muted-foreground line-clamp-1">{article.excerpt}</div>
+            <div className="line-clamp-1 text-sm font-medium">{form.og_title || form.headline}</div>
+            <div className="line-clamp-1 text-xs text-muted-foreground">{form.og_description || form.excerpt}</div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function SchemaPanel({ article }: { article: any }) {
-  const jsonld = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: article.title,
-    description: article.excerpt,
-    author: { "@type": "Person", name: authorById(article.author).name },
-    datePublished: article.publishAt ?? null,
-    dateModified: article.updatedAt,
-    inLanguage: article.language,
-    image: article.cover,
-  };
-  return (
-    <div className="space-y-4">
-      <Field label="Schema type">
-        <select className={inputCls} defaultValue="BlogPosting">
-          <option>BlogPosting</option>
-          <option>Article</option>
-          <option>NewsArticle</option>
-        </select>
-      </Field>
-      <div>
-        <div className="mono-label mb-2">FAQ entries</div>
-        <div className="space-y-2">
-          {["What is a microgreens tray cycle?", "How much does 40 m² produce?"].map((q, i) => (
-            <div key={i} className="rounded-md border border-border p-2.5">
-              <div className="text-sm font-medium">{q}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">Answer configured · 2 sentences</div>
-            </div>
-          ))}
-          <button className="w-full rounded-md border border-dashed border-border py-2 text-xs text-muted-foreground hover:text-foreground">
-            + Add FAQ entry
-          </button>
-        </div>
-      </div>
-      <div>
-        <div className="mono-label mb-2">JSON-LD preview</div>
-        <pre className="max-h-64 overflow-auto rounded-md border border-border bg-muted/50 p-3 font-mono text-[11px] leading-relaxed text-foreground">
-{JSON.stringify(jsonld, null, 2)}
-        </pre>
-      </div>
-    </div>
-  );
-}
-
-function LocalizationPanel() {
-  const trans = [
-    { code: "en", label: "English", state: "source", complete: 100 },
-    { code: "fr", label: "Français", state: "published", complete: 100 },
-    { code: "es", label: "Español", state: "draft", complete: 62 },
-    { code: "ar", label: "العربية (RTL)", state: "missing", complete: 0 },
-  ];
-  return (
-    <div className="space-y-3">
-      <div className="mono-label">Translations</div>
-      <ul className="space-y-2">
-        {trans.map((t) => (
-          <li key={t.code} className="rounded-md border border-border p-2.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="chip font-mono uppercase">{t.code}</span>
-                <span className="text-sm">{t.label}</span>
-              </div>
-              <span className="text-xs text-muted-foreground capitalize">{t.state}</span>
-            </div>
-            <div className="mt-2 h-1 overflow-hidden rounded-full bg-muted">
-              <div className="h-full bg-primary" style={{ width: `${t.complete}%` }} />
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function RelationsPanel() {
-  return (
-    <div className="space-y-4">
-      <div>
-        <div className="mono-label mb-2">Related articles</div>
-        <ul className="space-y-1.5">
-          {ARTICLES.slice(0, 3).map((a) => (
-            <li key={a.id} className="flex items-center gap-2 rounded-md border border-border p-2 text-sm">
-              <img src={a.cover} alt="" className="h-7 w-9 rounded object-cover" />
-              <span className="truncate">{a.title}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div>
-        <div className="mono-label mb-2 flex items-center gap-1.5">
-          <Info className="h-3 w-3" /> Internal linking suggestions
-        </div>
-        <ul className="space-y-1.5 text-sm">
-          <li className="rounded-md bg-primary-soft/60 border border-primary/20 p-2 text-primary">
-            Link "energy costs" → /blog/vertical-farming-energy-costs
-          </li>
-          <li className="rounded-md border border-border p-2">
-            Link "wholesale pricing" → /resources/wholesale-pricing-playbook
-          </li>
-        </ul>
-      </div>
-      <div className="flex items-center gap-2 rounded-md border border-warn/30 bg-warn/10 p-2.5 text-xs text-warn-foreground">
-        <AlertTriangle className="h-3.5 w-3.5" /> 2 outbound links haven't been checked in 30 days.
       </div>
     </div>
   );

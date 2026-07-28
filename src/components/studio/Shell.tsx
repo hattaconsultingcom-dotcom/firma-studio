@@ -4,10 +4,11 @@ import {
   LayoutDashboard, Globe, LayoutTemplate, Newspaper, BookOpen, FileText,
   GraduationCap, Sparkles, Copy, LifeBuoy, GitBranch, Mail, Search, LineChart,
   Image as ImageIcon, ArrowRightLeft, Tags, Users, Settings, ChevronsLeft, Blocks,
-  ChevronsRight, Command, Plus, Bell, Menu, X, Plug,
+  ChevronsRight, Command, Plus, Bell, Menu, X, Plug, LogOut,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { StudioLogo } from "./Logo";
+import { useAuth } from "@/lib/auth";
 
 type NavItem = { to: string; label: string; icon: LucideIcon; exact?: boolean; badge?: number; soon?: boolean };
 type NavGroup = { group: string; items: NavItem[] };
@@ -23,35 +24,35 @@ const NAV: NavGroup[] = [
   {
     group: "Publishing",
     items: [
-      { to: "/website", label: "Website", icon: Globe },
-      { to: "/landing", label: "Landing Pages", icon: LayoutTemplate },
-      { to: "/blog", label: "Blog", icon: Newspaper, badge: 3 },
-      { to: "/resources", label: "Resources", icon: BookOpen },
-      { to: "/docs", label: "Documentation", icon: FileText },
-      { to: "/academy", label: "Academy", icon: GraduationCap },
-      { to: "/case-studies", label: "Case Studies", icon: Sparkles },
-      { to: "/templates", label: "Templates", icon: Copy },
-      { to: "/help", label: "Help Center", icon: LifeBuoy },
-      { to: "/changelog", label: "Changelog", icon: GitBranch },
-      { to: "/newsletter", label: "Newsletter", icon: Mail },
+      { to: "/website", label: "Website", icon: Globe, soon: true },
+      { to: "/landing", label: "Landing Pages", icon: LayoutTemplate, soon: true },
+      { to: "/blog", label: "Blog", icon: Newspaper },
+      { to: "/resources", label: "Resources", icon: BookOpen, soon: true },
+      { to: "/docs", label: "Documentation", icon: FileText, soon: true },
+      { to: "/academy", label: "Academy", icon: GraduationCap, soon: true },
+      { to: "/case-studies", label: "Case Studies", icon: Sparkles, soon: true },
+      { to: "/templates", label: "Templates", icon: Copy, soon: true },
+      { to: "/help", label: "Help Center", icon: LifeBuoy, soon: true },
+      { to: "/changelog", label: "Changelog", icon: GitBranch, soon: true },
+      { to: "/newsletter", label: "Newsletter", icon: Mail, soon: true },
     ],
   },
   {
     group: "Growth",
     items: [
-      { to: "/seo", label: "SEO", icon: Search, badge: 12 },
-      { to: "/analytics", label: "Analytics", icon: LineChart },
-      { to: "/integrations", label: "Integrations", icon: Plug },
-      { to: "/media", label: "Media Library", icon: ImageIcon },
-      { to: "/redirects", label: "Redirects", icon: ArrowRightLeft },
+      { to: "/seo", label: "SEO", icon: Search, soon: true },
+      { to: "/analytics", label: "Analytics", icon: LineChart, soon: true },
+      { to: "/integrations", label: "Integrations", icon: Plug, soon: true },
+      { to: "/media", label: "Media Library", icon: ImageIcon, soon: true },
+      { to: "/redirects", label: "Redirects", icon: ArrowRightLeft, soon: true },
       { to: "/taxonomy", label: "Taxonomy", icon: Tags },
     ],
   },
   {
     group: "System",
     items: [
-      { to: "/team", label: "Team", icon: Users },
-      { to: "/settings", label: "Settings", icon: Settings },
+      { to: "/team", label: "Team", icon: Users, soon: true },
+      { to: "/settings", label: "Settings", icon: Settings, soon: true },
     ],
   },
 ];
@@ -97,10 +98,6 @@ function SidebarInner({ collapsed, onNavigate }: { collapsed: boolean; onNavigat
                         {item.soon ? (
                           <span className="ml-auto rounded-full border border-border bg-muted px-1.5 text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
                             Soon
-                          </span>
-                        ) : item.badge ? (
-                          <span className="ml-auto rounded-full bg-primary-soft px-1.5 text-[10px] font-medium text-primary">
-                            {item.badge}
                           </span>
                         ) : null}
                       </>
@@ -162,6 +159,13 @@ function MobileSidebar({ open, onClose }: { open: boolean; onClose: () => void }
 }
 
 function TopBar({ onMenu }: { onMenu: () => void }) {
+  const { profile, signOut } = useAuth();
+  const initials = (profile?.full_name || "AF")
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
   return (
     <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-border bg-background/85 px-3 sm:px-5 backdrop-blur">
       <button onClick={onMenu} className="lg:hidden p-1.5 rounded-md hover:bg-sidebar-accent">
@@ -187,9 +191,21 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
           <Bell className="h-4 w-4" />
           <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
         </button>
-        <div className="h-8 w-8 rounded-full bg-primary/90 text-primary-foreground grid place-items-center text-xs font-medium">
-          AF
-        </div>
+        <button
+          onClick={() => signOut()}
+          className="p-2 rounded-md hover:bg-muted"
+          aria-label="Sign out"
+          title="Sign out"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
+        {profile?.avatar_url ? (
+          <img src={profile.avatar_url} alt={profile.full_name} className="h-8 w-8 rounded-full object-cover" />
+        ) : (
+          <div className="h-8 w-8 rounded-full bg-primary/90 text-primary-foreground grid place-items-center text-xs font-medium">
+            {initials}
+          </div>
+        )}
       </div>
     </header>
   );

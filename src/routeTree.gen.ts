@@ -9,141 +9,47 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WebsiteRouteImport } from './routes/website'
-import { Route as TemplatesRouteImport } from './routes/templates'
-import { Route as TeamRouteImport } from './routes/team'
-import { Route as TaxonomyRouteImport } from './routes/taxonomy'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as SeoRouteImport } from './routes/seo'
-import { Route as ResourcesRouteImport } from './routes/resources'
-import { Route as RedirectsRouteImport } from './routes/redirects'
-import { Route as NewsletterRouteImport } from './routes/newsletter'
-import { Route as MediaRouteImport } from './routes/media'
-import { Route as LandingRouteImport } from './routes/landing'
-import { Route as JournalRouteImport } from './routes/journal'
-import { Route as IntegrationsRouteImport } from './routes/integrations'
-import { Route as HelpRouteImport } from './routes/help'
-import { Route as DocsRouteImport } from './routes/docs'
-import { Route as ChangelogRouteImport } from './routes/changelog'
-import { Route as CaseStudiesRouteImport } from './routes/case-studies'
-import { Route as BlogRouteImport } from './routes/blog'
-import { Route as ArchitectureRouteImport } from './routes/architecture'
-import { Route as AnalyticsRouteImport } from './routes/analytics'
-import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as JournalResourcesRouteImport } from './routes/journal.resources'
-import { Route as JournalHelpRouteImport } from './routes/journal.help'
-import { Route as JournalChangelogRouteImport } from './routes/journal.changelog'
-import { Route as JournalCaseStudiesRouteImport } from './routes/journal.case-studies'
-import { Route as JournalArticlesRouteImport } from './routes/journal.articles'
-import { Route as JournalAcademyRouteImport } from './routes/journal.academy'
-import { Route as JournalSlugRouteImport } from './routes/journal.$slug'
+import { Route as AcademyRouteImport } from './routes/academy'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as ArchitectureRouteImport } from './routes/architecture'
+import { Route as BlogRouteImport } from './routes/blog'
+import { Route as CaseStudiesRouteImport } from './routes/case-studies'
+import { Route as ChangelogRouteImport } from './routes/changelog'
+import { Route as DocsRouteImport } from './routes/docs'
+import { Route as HelpRouteImport } from './routes/help'
+import { Route as IntegrationsRouteImport } from './routes/integrations'
+import { Route as JournalRouteImport } from './routes/journal'
+import { Route as LandingRouteImport } from './routes/landing'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as MediaRouteImport } from './routes/media'
+import { Route as NewsletterRouteImport } from './routes/newsletter'
+import { Route as RedirectsRouteImport } from './routes/redirects'
+import { Route as ResourcesRouteImport } from './routes/resources'
+import { Route as SeoRouteImport } from './routes/seo'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as TaxonomyRouteImport } from './routes/taxonomy'
+import { Route as TeamRouteImport } from './routes/team'
+import { Route as TemplatesRouteImport } from './routes/templates'
+import { Route as WebsiteRouteImport } from './routes/website'
 import { Route as BlogIdRouteImport } from './routes/blog.$id'
-import { Route as JournalResourcesSlugRouteImport } from './routes/journal.resources.$slug'
-import { Route as JournalHelpSlugRouteImport } from './routes/journal.help.$slug'
-import { Route as JournalChangelogSlugRouteImport } from './routes/journal.changelog.$slug'
-import { Route as JournalCaseStudiesSlugRouteImport } from './routes/journal.case-studies.$slug'
-import { Route as JournalArticlesSlugRouteImport } from './routes/journal.articles.$slug'
+import { Route as JournalSlugRouteImport } from './routes/journal.$slug'
+import { Route as JournalAcademyRouteImport } from './routes/journal.academy'
+import { Route as JournalArticlesRouteImport } from './routes/journal.articles'
+import { Route as JournalCaseStudiesRouteImport } from './routes/journal.case-studies'
+import { Route as JournalChangelogRouteImport } from './routes/journal.changelog'
+import { Route as JournalHelpRouteImport } from './routes/journal.help'
+import { Route as JournalResourcesRouteImport } from './routes/journal.resources'
 import { Route as JournalAcademySlugRouteImport } from './routes/journal.academy.$slug'
+import { Route as JournalArticlesSlugRouteImport } from './routes/journal.articles.$slug'
+import { Route as JournalCaseStudiesSlugRouteImport } from './routes/journal.case-studies.$slug'
+import { Route as JournalChangelogSlugRouteImport } from './routes/journal.changelog.$slug'
+import { Route as JournalHelpSlugRouteImport } from './routes/journal.help.$slug'
+import { Route as JournalResourcesSlugRouteImport } from './routes/journal.resources.$slug'
 
-const WebsiteRoute = WebsiteRouteImport.update({
-  id: '/website',
-  path: '/website',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TemplatesRoute = TemplatesRouteImport.update({
-  id: '/templates',
-  path: '/templates',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TeamRoute = TeamRouteImport.update({
-  id: '/team',
-  path: '/team',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TaxonomyRoute = TaxonomyRouteImport.update({
-  id: '/taxonomy',
-  path: '/taxonomy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SeoRoute = SeoRouteImport.update({
-  id: '/seo',
-  path: '/seo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResourcesRoute = ResourcesRouteImport.update({
-  id: '/resources',
-  path: '/resources',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RedirectsRoute = RedirectsRouteImport.update({
-  id: '/redirects',
-  path: '/redirects',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NewsletterRoute = NewsletterRouteImport.update({
-  id: '/newsletter',
-  path: '/newsletter',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MediaRoute = MediaRouteImport.update({
-  id: '/media',
-  path: '/media',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LandingRoute = LandingRouteImport.update({
-  id: '/landing',
-  path: '/landing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const JournalRoute = JournalRouteImport.update({
-  id: '/journal',
-  path: '/journal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IntegrationsRoute = IntegrationsRouteImport.update({
-  id: '/integrations',
-  path: '/integrations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HelpRoute = HelpRouteImport.update({
-  id: '/help',
-  path: '/help',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DocsRoute = DocsRouteImport.update({
-  id: '/docs',
-  path: '/docs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChangelogRoute = ChangelogRouteImport.update({
-  id: '/changelog',
-  path: '/changelog',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaseStudiesRoute = CaseStudiesRouteImport.update({
-  id: '/case-studies',
-  path: '/case-studies',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlogRoute = BlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ArchitectureRoute = ArchitectureRouteImport.update({
-  id: '/architecture',
-  path: '/architecture',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnalyticsRoute = AnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AcademyRoute = AcademyRouteImport.update({
@@ -151,34 +57,119 @@ const AcademyRoute = AcademyRouteImport.update({
   path: '/academy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JournalResourcesRoute = JournalResourcesRouteImport.update({
-  id: '/resources',
-  path: '/resources',
-  getParentRoute: () => JournalRoute,
+const ArchitectureRoute = ArchitectureRouteImport.update({
+  id: '/architecture',
+  path: '/architecture',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const JournalHelpRoute = JournalHelpRouteImport.update({
-  id: '/help',
-  path: '/help',
-  getParentRoute: () => JournalRoute,
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const JournalChangelogRoute = JournalChangelogRouteImport.update({
-  id: '/changelog',
-  path: '/changelog',
-  getParentRoute: () => JournalRoute,
-} as any)
-const JournalCaseStudiesRoute = JournalCaseStudiesRouteImport.update({
+const CaseStudiesRoute = CaseStudiesRouteImport.update({
   id: '/case-studies',
   path: '/case-studies',
-  getParentRoute: () => JournalRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-const JournalArticlesRoute = JournalArticlesRouteImport.update({
-  id: '/articles',
-  path: '/articles',
+const ChangelogRoute = ChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegrationsRoute = IntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JournalRoute = JournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/landing',
+  path: '/landing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MediaRoute = MediaRouteImport.update({
+  id: '/media',
+  path: '/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsletterRoute = NewsletterRouteImport.update({
+  id: '/newsletter',
+  path: '/newsletter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedirectsRoute = RedirectsRouteImport.update({
+  id: '/redirects',
+  path: '/redirects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesRoute = ResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeoRoute = SeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TaxonomyRoute = TaxonomyRouteImport.update({
+  id: '/taxonomy',
+  path: '/taxonomy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesRoute = TemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WebsiteRoute = WebsiteRouteImport.update({
+  id: '/website',
+  path: '/website',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIdRoute = BlogIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => BlogRoute,
+} as any)
+const JournalSlugRoute = JournalSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
   getParentRoute: () => JournalRoute,
 } as any)
 const JournalAcademyRoute = JournalAcademyRouteImport.update({
@@ -186,45 +177,60 @@ const JournalAcademyRoute = JournalAcademyRouteImport.update({
   path: '/academy',
   getParentRoute: () => JournalRoute,
 } as any)
-const JournalSlugRoute = JournalSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
+const JournalArticlesRoute = JournalArticlesRouteImport.update({
+  id: '/articles',
+  path: '/articles',
   getParentRoute: () => JournalRoute,
 } as any)
-const BlogIdRoute = BlogIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => BlogRoute,
+const JournalCaseStudiesRoute = JournalCaseStudiesRouteImport.update({
+  id: '/case-studies',
+  path: '/case-studies',
+  getParentRoute: () => JournalRoute,
 } as any)
-const JournalResourcesSlugRoute = JournalResourcesSlugRouteImport.update({
+const JournalChangelogRoute = JournalChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
+  getParentRoute: () => JournalRoute,
+} as any)
+const JournalHelpRoute = JournalHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => JournalRoute,
+} as any)
+const JournalResourcesRoute = JournalResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => JournalRoute,
+} as any)
+const JournalAcademySlugRoute = JournalAcademySlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
-  getParentRoute: () => JournalResourcesRoute,
-} as any)
-const JournalHelpSlugRoute = JournalHelpSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => JournalHelpRoute,
-} as any)
-const JournalChangelogSlugRoute = JournalChangelogSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => JournalChangelogRoute,
-} as any)
-const JournalCaseStudiesSlugRoute = JournalCaseStudiesSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => JournalCaseStudiesRoute,
+  getParentRoute: () => JournalAcademyRoute,
 } as any)
 const JournalArticlesSlugRoute = JournalArticlesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => JournalArticlesRoute,
 } as any)
-const JournalAcademySlugRoute = JournalAcademySlugRouteImport.update({
+const JournalCaseStudiesSlugRoute = JournalCaseStudiesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
-  getParentRoute: () => JournalAcademyRoute,
+  getParentRoute: () => JournalCaseStudiesRoute,
+} as any)
+const JournalChangelogSlugRoute = JournalChangelogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => JournalChangelogRoute,
+} as any)
+const JournalHelpSlugRoute = JournalHelpSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => JournalHelpRoute,
+} as any)
+const JournalResourcesSlugRoute = JournalResourcesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => JournalResourcesRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -240,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/integrations': typeof IntegrationsRoute
   '/journal': typeof JournalRouteWithChildren
   '/landing': typeof LandingRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/newsletter': typeof NewsletterRoute
   '/redirects': typeof RedirectsRoute
@@ -278,6 +285,7 @@ export interface FileRoutesByTo {
   '/integrations': typeof IntegrationsRoute
   '/journal': typeof JournalRouteWithChildren
   '/landing': typeof LandingRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/newsletter': typeof NewsletterRoute
   '/redirects': typeof RedirectsRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/integrations': typeof IntegrationsRoute
   '/journal': typeof JournalRouteWithChildren
   '/landing': typeof LandingRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/newsletter': typeof NewsletterRoute
   '/redirects': typeof RedirectsRoute
@@ -357,6 +366,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/journal'
     | '/landing'
+    | '/login'
     | '/media'
     | '/newsletter'
     | '/redirects'
@@ -395,6 +405,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/journal'
     | '/landing'
+    | '/login'
     | '/media'
     | '/newsletter'
     | '/redirects'
@@ -433,6 +444,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/journal'
     | '/landing'
+    | '/login'
     | '/media'
     | '/newsletter'
     | '/redirects'
@@ -472,6 +484,7 @@ export interface RootRouteChildren {
   IntegrationsRoute: typeof IntegrationsRoute
   JournalRoute: typeof JournalRouteWithChildren
   LandingRoute: typeof LandingRoute
+  LoginRoute: typeof LoginRoute
   MediaRoute: typeof MediaRoute
   NewsletterRoute: typeof NewsletterRoute
   RedirectsRoute: typeof RedirectsRoute
@@ -486,144 +499,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/website': {
-      id: '/website'
-      path: '/website'
-      fullPath: '/website'
-      preLoaderRoute: typeof WebsiteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/templates': {
-      id: '/templates'
-      path: '/templates'
-      fullPath: '/templates'
-      preLoaderRoute: typeof TemplatesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/team': {
-      id: '/team'
-      path: '/team'
-      fullPath: '/team'
-      preLoaderRoute: typeof TeamRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/taxonomy': {
-      id: '/taxonomy'
-      path: '/taxonomy'
-      fullPath: '/taxonomy'
-      preLoaderRoute: typeof TaxonomyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/seo': {
-      id: '/seo'
-      path: '/seo'
-      fullPath: '/seo'
-      preLoaderRoute: typeof SeoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/resources': {
-      id: '/resources'
-      path: '/resources'
-      fullPath: '/resources'
-      preLoaderRoute: typeof ResourcesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/redirects': {
-      id: '/redirects'
-      path: '/redirects'
-      fullPath: '/redirects'
-      preLoaderRoute: typeof RedirectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/newsletter': {
-      id: '/newsletter'
-      path: '/newsletter'
-      fullPath: '/newsletter'
-      preLoaderRoute: typeof NewsletterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/media': {
-      id: '/media'
-      path: '/media'
-      fullPath: '/media'
-      preLoaderRoute: typeof MediaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/landing': {
-      id: '/landing'
-      path: '/landing'
-      fullPath: '/landing'
-      preLoaderRoute: typeof LandingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/journal': {
-      id: '/journal'
-      path: '/journal'
-      fullPath: '/journal'
-      preLoaderRoute: typeof JournalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/integrations': {
-      id: '/integrations'
-      path: '/integrations'
-      fullPath: '/integrations'
-      preLoaderRoute: typeof IntegrationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/help': {
-      id: '/help'
-      path: '/help'
-      fullPath: '/help'
-      preLoaderRoute: typeof HelpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/docs': {
-      id: '/docs'
-      path: '/docs'
-      fullPath: '/docs'
-      preLoaderRoute: typeof DocsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/changelog': {
-      id: '/changelog'
-      path: '/changelog'
-      fullPath: '/changelog'
-      preLoaderRoute: typeof ChangelogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/case-studies': {
-      id: '/case-studies'
-      path: '/case-studies'
-      fullPath: '/case-studies'
-      preLoaderRoute: typeof CaseStudiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog': {
-      id: '/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/architecture': {
-      id: '/architecture'
-      path: '/architecture'
-      fullPath: '/architecture'
-      preLoaderRoute: typeof ArchitectureRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/analytics': {
-      id: '/analytics'
-      path: '/analytics'
-      fullPath: '/analytics'
-      preLoaderRoute: typeof AnalyticsRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/academy': {
@@ -633,46 +513,165 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AcademyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/journal/resources': {
-      id: '/journal/resources'
-      path: '/resources'
-      fullPath: '/journal/resources'
-      preLoaderRoute: typeof JournalResourcesRouteImport
-      parentRoute: typeof JournalRoute
+    '/architecture': {
+      id: '/architecture'
+      path: '/architecture'
+      fullPath: '/architecture'
+      preLoaderRoute: typeof ArchitectureRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/journal/help': {
-      id: '/journal/help'
-      path: '/help'
-      fullPath: '/journal/help'
-      preLoaderRoute: typeof JournalHelpRouteImport
-      parentRoute: typeof JournalRoute
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/journal/changelog': {
-      id: '/journal/changelog'
-      path: '/changelog'
-      fullPath: '/journal/changelog'
-      preLoaderRoute: typeof JournalChangelogRouteImport
-      parentRoute: typeof JournalRoute
-    }
-    '/journal/case-studies': {
-      id: '/journal/case-studies'
+    '/case-studies': {
+      id: '/case-studies'
       path: '/case-studies'
-      fullPath: '/journal/case-studies'
-      preLoaderRoute: typeof JournalCaseStudiesRouteImport
-      parentRoute: typeof JournalRoute
+      fullPath: '/case-studies'
+      preLoaderRoute: typeof CaseStudiesRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/journal/articles': {
-      id: '/journal/articles'
-      path: '/articles'
-      fullPath: '/journal/articles'
-      preLoaderRoute: typeof JournalArticlesRouteImport
+    '/changelog': {
+      id: '/changelog'
+      path: '/changelog'
+      fullPath: '/changelog'
+      preLoaderRoute: typeof ChangelogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrations': {
+      id: '/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof IntegrationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal': {
+      id: '/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof JournalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing': {
+      id: '/landing'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof LandingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/media': {
+      id: '/media'
+      path: '/media'
+      fullPath: '/media'
+      preLoaderRoute: typeof MediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/newsletter': {
+      id: '/newsletter'
+      path: '/newsletter'
+      fullPath: '/newsletter'
+      preLoaderRoute: typeof NewsletterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redirects': {
+      id: '/redirects'
+      path: '/redirects'
+      fullPath: '/redirects'
+      preLoaderRoute: typeof RedirectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seo': {
+      id: '/seo'
+      path: '/seo'
+      fullPath: '/seo'
+      preLoaderRoute: typeof SeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/taxonomy': {
+      id: '/taxonomy'
+      path: '/taxonomy'
+      fullPath: '/taxonomy'
+      preLoaderRoute: typeof TaxonomyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/templates': {
+      id: '/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof TemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/website': {
+      id: '/website'
+      path: '/website'
+      fullPath: '/website'
+      preLoaderRoute: typeof WebsiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$id': {
+      id: '/blog/$id'
+      path: '/$id'
+      fullPath: '/blog/$id'
+      preLoaderRoute: typeof BlogIdRouteImport
+      parentRoute: typeof BlogRoute
+    }
+    '/journal/$slug': {
+      id: '/journal/$slug'
+      path: '/$slug'
+      fullPath: '/journal/$slug'
+      preLoaderRoute: typeof JournalSlugRouteImport
       parentRoute: typeof JournalRoute
     }
     '/journal/academy': {
@@ -682,47 +681,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JournalAcademyRouteImport
       parentRoute: typeof JournalRoute
     }
-    '/journal/$slug': {
-      id: '/journal/$slug'
-      path: '/$slug'
-      fullPath: '/journal/$slug'
-      preLoaderRoute: typeof JournalSlugRouteImport
+    '/journal/articles': {
+      id: '/journal/articles'
+      path: '/articles'
+      fullPath: '/journal/articles'
+      preLoaderRoute: typeof JournalArticlesRouteImport
       parentRoute: typeof JournalRoute
     }
-    '/blog/$id': {
-      id: '/blog/$id'
-      path: '/$id'
-      fullPath: '/blog/$id'
-      preLoaderRoute: typeof BlogIdRouteImport
-      parentRoute: typeof BlogRoute
+    '/journal/case-studies': {
+      id: '/journal/case-studies'
+      path: '/case-studies'
+      fullPath: '/journal/case-studies'
+      preLoaderRoute: typeof JournalCaseStudiesRouteImport
+      parentRoute: typeof JournalRoute
     }
-    '/journal/resources/$slug': {
-      id: '/journal/resources/$slug'
-      path: '/$slug'
-      fullPath: '/journal/resources/$slug'
-      preLoaderRoute: typeof JournalResourcesSlugRouteImport
-      parentRoute: typeof JournalResourcesRoute
+    '/journal/changelog': {
+      id: '/journal/changelog'
+      path: '/changelog'
+      fullPath: '/journal/changelog'
+      preLoaderRoute: typeof JournalChangelogRouteImport
+      parentRoute: typeof JournalRoute
     }
-    '/journal/help/$slug': {
-      id: '/journal/help/$slug'
-      path: '/$slug'
-      fullPath: '/journal/help/$slug'
-      preLoaderRoute: typeof JournalHelpSlugRouteImport
-      parentRoute: typeof JournalHelpRoute
+    '/journal/help': {
+      id: '/journal/help'
+      path: '/help'
+      fullPath: '/journal/help'
+      preLoaderRoute: typeof JournalHelpRouteImport
+      parentRoute: typeof JournalRoute
     }
-    '/journal/changelog/$slug': {
-      id: '/journal/changelog/$slug'
-      path: '/$slug'
-      fullPath: '/journal/changelog/$slug'
-      preLoaderRoute: typeof JournalChangelogSlugRouteImport
-      parentRoute: typeof JournalChangelogRoute
+    '/journal/resources': {
+      id: '/journal/resources'
+      path: '/resources'
+      fullPath: '/journal/resources'
+      preLoaderRoute: typeof JournalResourcesRouteImport
+      parentRoute: typeof JournalRoute
     }
-    '/journal/case-studies/$slug': {
-      id: '/journal/case-studies/$slug'
+    '/journal/academy/$slug': {
+      id: '/journal/academy/$slug'
       path: '/$slug'
-      fullPath: '/journal/case-studies/$slug'
-      preLoaderRoute: typeof JournalCaseStudiesSlugRouteImport
-      parentRoute: typeof JournalCaseStudiesRoute
+      fullPath: '/journal/academy/$slug'
+      preLoaderRoute: typeof JournalAcademySlugRouteImport
+      parentRoute: typeof JournalAcademyRoute
     }
     '/journal/articles/$slug': {
       id: '/journal/articles/$slug'
@@ -731,12 +730,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JournalArticlesSlugRouteImport
       parentRoute: typeof JournalArticlesRoute
     }
-    '/journal/academy/$slug': {
-      id: '/journal/academy/$slug'
+    '/journal/case-studies/$slug': {
+      id: '/journal/case-studies/$slug'
       path: '/$slug'
-      fullPath: '/journal/academy/$slug'
-      preLoaderRoute: typeof JournalAcademySlugRouteImport
-      parentRoute: typeof JournalAcademyRoute
+      fullPath: '/journal/case-studies/$slug'
+      preLoaderRoute: typeof JournalCaseStudiesSlugRouteImport
+      parentRoute: typeof JournalCaseStudiesRoute
+    }
+    '/journal/changelog/$slug': {
+      id: '/journal/changelog/$slug'
+      path: '/$slug'
+      fullPath: '/journal/changelog/$slug'
+      preLoaderRoute: typeof JournalChangelogSlugRouteImport
+      parentRoute: typeof JournalChangelogRoute
+    }
+    '/journal/help/$slug': {
+      id: '/journal/help/$slug'
+      path: '/$slug'
+      fullPath: '/journal/help/$slug'
+      preLoaderRoute: typeof JournalHelpSlugRouteImport
+      parentRoute: typeof JournalHelpRoute
+    }
+    '/journal/resources/$slug': {
+      id: '/journal/resources/$slug'
+      path: '/$slug'
+      fullPath: '/journal/resources/$slug'
+      preLoaderRoute: typeof JournalResourcesSlugRouteImport
+      parentRoute: typeof JournalResourcesRoute
     }
   }
 }
@@ -856,6 +876,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntegrationsRoute: IntegrationsRoute,
   JournalRoute: JournalRouteWithChildren,
   LandingRoute: LandingRoute,
+  LoginRoute: LoginRoute,
   MediaRoute: MediaRoute,
   NewsletterRoute: NewsletterRoute,
   RedirectsRoute: RedirectsRoute,
@@ -870,3 +891,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

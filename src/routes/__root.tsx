@@ -7,12 +7,47 @@ import {
   useRouterState,
   HeadContent,
   Scripts,
+  useNavigate,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Shell } from "../components/studio/Shell";
+import { AuthProvider, useAuth } from "../lib/auth";
+import { Loader2 } from "lucide-react";
+
+const PRIVATE_PREFIXES = [
+  "/architecture",
+  "/website",
+  "/landing",
+  "/blog",
+  "/resources",
+  "/docs",
+  "/academy",
+  "/case-studies",
+  "/templates",
+  "/help",
+  "/changelog",
+  "/newsletter",
+  "/seo",
+  "/analytics",
+  "/integrations",
+  "/media",
+  "/redirects",
+  "/taxonomy",
+  "/team",
+  "/settings",
+];
+
+function isPrivateRoute(pathname: string): boolean {
+  if (pathname === "/") return true;
+  return PRIVATE_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+}
+
+function isPublicRoute(pathname: string): boolean {
+  return pathname === "/journal" || pathname.startsWith("/journal/");
+}
 
 function NotFoundComponent() {
   return (
@@ -106,10 +141,58 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isPublic = pathname === "/journal" || pathname.startsWith("/journal/");
+  const isPublic = isPublicRoute(pathname);
+  const isLogin = pathname === "/login";
+
   return (
     <QueryClientProvider client={queryClient}>
-      {isPublic ? <Outlet /> : <Shell><Outlet /></Shell>}
+      <AuthProvider>
+        {isPublic || isLogin ? (
+          <Outlet />
+        ) : (
+          <AuthGuard>
+            <Shell>
+              <Outlet />
+            </Shell>
+          </AuthGuard>
+        )}
+      </AuthProvider>
     </QueryClientProvider>
   );
+}
+
+function AuthGuard({ children }: { children: ReactNode }) {
+  const { session, loading } = useAuth();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    if (!loading && !session) {
+      navigate({ to: "/login", search: { redirect: pathname } });
+    }
+  }, [session, loading, navigate, pathname]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+          <p className="mt-3 text-sm text-muted-foreground">Loading studio…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+          <p className="mt-3 text-sm text-muted-foreground">Redirecting to login…</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 }

@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageBody, PageHeader } from "@/components/studio/PageHeader";
 import { StatusBadge } from "@/components/studio/StatusBadge";
-import { ARTICLES, ACTIVITY, TOP_PAGES, SEO_ISSUES, authorById, MEDIA } from "@/lib/mock";
-import { ArrowUpRight, AlertTriangle, Calendar, Clock, Sparkles, Plus, FileText, Image as ImageIcon, Search } from "lucide-react";
+import { ACTIVITY, TOP_PAGES, SEO_ISSUES, MEDIA, authorById } from "@/lib/mock";
+import { supabase, type ArticleWithRelations } from "@/lib/supabase";
+import { ArrowUpRight, AlertTriangle, Calendar, Clock, Sparkles, Plus, FileText, Image as ImageIcon, Search, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -14,7 +16,7 @@ export const Route = createFileRoute("/")({
   component: Overview,
 });
 
-function Stat({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: "ok" | "warn" | "danger" }) {
+function Stat({ label, value, sub, tone, loading }: { label: string; value: string; sub?: string; tone?: "ok" | "warn" | "danger"; loading?: boolean }) {
   const dot = tone === "warn" ? "bg-warn" : tone === "danger" ? "bg-destructive" : "bg-success";
   return (
     <div className="surface-card p-4">
@@ -22,24 +24,46 @@ function Stat({ label, value, sub, tone }: { label: string; value: string; sub?:
         <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
         {label}
       </div>
-      <div className="mt-2 h-display text-3xl">{value}</div>
+      <div className="mt-2 h-display text-3xl">
+        {loading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : value}
+      </div>
       {sub && <div className="mt-1 text-xs text-muted-foreground">{sub}</div>}
     </div>
   );
 }
 
 function Overview() {
-  const drafts = ARTICLES.filter((a) => a.status === "draft");
-  const inReview = ARTICLES.filter((a) => a.status === "in_review");
-  const scheduled = ARTICLES.filter((a) => a.status === "scheduled");
-  const published = ARTICLES.filter((a) => a.status === "published");
+  const [articles, setArticles] = useState<ArticleWithRelations[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase
+        .from("articles")
+        .select(`
+          *,
+          authors:author_id (id, name, slug, bio, avatar_url, created_at, updated_at),
+          categories:category_id (id, name, slug, created_at, updated_at),
+          article_tags ( tags:tag_id (id, name, slug, created_at, updated_at) )
+        `)
+        .order("updated_at", { ascending: false });
+      setArticles((data ?? []) as unknown as ArticleWithRelations[]);
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  const drafts = articles.filter((a) => a.status === "draft");
+  const published = articles.filter((a) => a.status === "published");
+  const archived = articles.filter((a) => a.status === "archived");
   const criticalIssues = SEO_ISSUES.filter((i) => i.severity === "critical" && i.state === "open");
+  const recentlyUpdated = articles.slice(0, 5);
 
   return (
     <>
       <PageHeader
-        eyebrow="Studio · Monday, 27 July 2026"
-        title="Editorial operations"
+        eyebrow="Studio · Editorial operations"
+        title="Overview"
         description="What needs your attention across the FIRMA public website today."
         actions={
           <>
@@ -54,42 +78,70 @@ function Overview() {
             <Link to="/blog" className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm hover:bg-muted">
               <FileText className="h-4 w-4" /> Open blog
             </Link>
-            <button className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:opacity-95">
+            <Link to="/blog/$id" params={{ id: "new" }} className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:opacity-95">
               <Plus className="h-4 w-4" /> New article
-            </button>
+            </Link>
           </>
         }
       />
       <PageBody>
+        {/* Real article stats */}
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          <Stat label="Needs attention" value={String(criticalIssues.length + inReview.length)} sub={`${criticalIssues.length} SEO · ${inReview.length} in review`} tone="warn" />
-          <Stat label="Drafts in progress" value={String(drafts.length)} sub="Across 3 authors" />
-          <Stat label="Scheduled" value={String(scheduled.length)} sub="Next: Wed 08:00 CET" />
-          <Stat label="Published (30d)" value={String(published.length)} sub="+2 vs last month" />
+          <Stat label="Total articles" value={String(articles.length)} loading={loading} />
+          <Stat label="Drafts" value={String(drafts.length)} loading={loading} />
+          <Stat label="Published" value={String(published.length)} loading={loading} />
+          <Stat label="Archived" value={String(archived.length)} loading={loading} />
+        </div>
+
+        {/* Preview stats */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <Stat label="Needs attention" value="—" sub="Preview · SEO center coming soon" tone="warn" />
+          <Stat label="Scheduled" value="—" sub="Preview · Scheduling coming soon" />
+          <Stat label="Published (30d)" value="—" sub="Preview · Analytics coming soon" />
+          <Stat label="Views (30d)" value="—" sub="Preview · Analytics coming soon" />
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
-          {/* Attention list */}
+          {/* Recently updated */}
           <div className="surface-card lg:col-span-2">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div className="flex items-center gap-2 text-sm font-medium">
-                <AlertTriangle className="h-4 w-4 text-warn" /> Needs your attention
+                <Sparkles className="h-4 w-4 text-primary" /> Recently updated articles
               </div>
-              <Link to="/seo" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-                View SEO center <ArrowUpRight className="h-3 w-3" />
-              </Link>
+              <Link to="/blog" className="text-xs text-muted-foreground hover:text-foreground">View all</Link>
             </div>
-            <ul className="divide-y divide-border">
-              {[...criticalIssues.slice(0, 3), ...inReview.slice(0, 2).map((a) => ({ page: `/blog/${a.slug}`, issue: `In review: ${a.title}`, severity: "info" as const }))].map((row, i) => (
-                <li key={i} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3">
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium">{row.issue}</div>
-                    <div className="mt-0.5 truncate font-mono text-xs text-muted-foreground">{row.page}</div>
-                  </div>
-                  <button className="shrink-0 rounded-md border border-border bg-card px-2.5 py-1 text-xs hover:bg-muted">Review</button>
-                </li>
-              ))}
-            </ul>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : recentlyUpdated.length === 0 ? (
+              <div className="p-8 text-center text-sm text-muted-foreground">
+                No articles yet. <Link to="/blog/$id" params={{ id: "new" }} className="text-primary hover:underline">Create your first article</Link>.
+              </div>
+            ) : (
+              <ul className="divide-y divide-border">
+                {recentlyUpdated.map((a) => (
+                  <li key={a.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3">
+                    {a.featured_image_url ? (
+                      <img src={a.featured_image_url} alt="" className="h-10 w-14 shrink-0 rounded-md object-cover" />
+                    ) : (
+                      <div className="grid h-10 w-14 shrink-0 place-items-center rounded-md bg-muted">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <Link to="/blog/$id" params={{ id: a.id }} className="truncate text-sm font-medium hover:underline">
+                        {a.headline}
+                      </Link>
+                      <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {a.authors?.name ?? "—"} · {a.categories?.name ?? "—"} · {new Date(a.updated_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <StatusBadge status={a.status} />
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {/* Publishing calendar preview */}
@@ -98,65 +150,38 @@ function Overview() {
               <div className="flex items-center gap-2 text-sm font-medium">
                 <Calendar className="h-4 w-4 text-primary" /> Publishing calendar
               </div>
-              <span className="text-xs text-muted-foreground">This week</span>
+              <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Preview</span>
             </div>
-            <ul className="p-2">
-              {scheduled.slice(0, 4).map((a) => (
-                <li key={a.id} className="flex items-start gap-3 rounded-md p-2 hover:bg-muted">
-                  <div className="mt-0.5 grid h-8 w-10 shrink-0 place-items-center rounded-md bg-primary-soft text-[11px] font-mono text-primary">
-                    {new Date(a.publishAt!).toLocaleDateString("en", { day: "2-digit", month: "short" })}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium">{a.title}</div>
-                    <div className="mt-0.5 text-xs text-muted-foreground">
-                      {authorById(a.author).name} · {a.category}
-                    </div>
-                  </div>
-                </li>
-              ))}
-              {scheduled.length === 0 && <li className="p-4 text-sm text-muted-foreground">Nothing scheduled this week.</li>}
-            </ul>
+            <div className="p-4 text-sm text-muted-foreground">
+              Scheduling is coming soon. For now, publish directly from the article editor.
+            </div>
           </div>
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
-          {/* Recently published */}
+          {/* SEO center preview */}
           <div className="surface-card lg:col-span-2">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div className="flex items-center gap-2 text-sm font-medium">
-                <Sparkles className="h-4 w-4 text-primary" /> Recently published
+                <AlertTriangle className="h-4 w-4 text-warn" /> SEO center
               </div>
-              <Link to="/blog" className="text-xs text-muted-foreground hover:text-foreground">View all</Link>
+              <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Coming Soon</span>
             </div>
-            <ul className="divide-y divide-border">
-              {published.slice(0, 4).map((a) => (
-                <li key={a.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3">
-                  <img src={a.cover} alt="" className="h-10 w-14 shrink-0 rounded-md object-cover" />
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium">{a.title}</div>
-                    <div className="mt-0.5 truncate text-xs text-muted-foreground">
-                      {authorById(a.author).name} · {a.category}
-                    </div>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <div className="font-mono text-sm tabular-nums">{a.views?.toLocaleString()}</div>
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">views</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <div className="p-4 text-sm text-muted-foreground">
+              The SEO audit, structured data and FAQ schema tools are coming soon.
+            </div>
           </div>
 
-          {/* Top pages */}
+          {/* Top pages preview */}
           <div className="surface-card">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <Search className="h-4 w-4 text-primary" /> Top pages
               </div>
-              <span className="text-xs text-muted-foreground">Last 30d</span>
+              <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Preview</span>
             </div>
             <ul className="divide-y divide-border">
-              {TOP_PAGES.map((p) => (
+              {TOP_PAGES.slice(0, 3).map((p) => (
                 <li key={p.path} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 px-4 py-2.5">
                   <div className="min-w-0 truncate font-mono text-xs text-muted-foreground">{p.path}</div>
                   <div className="font-mono text-xs tabular-nums">{p.views.toLocaleString()}</div>
@@ -166,91 +191,31 @@ function Overview() {
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
-          {/* Activity */}
-          <div className="surface-card lg:col-span-2">
-            <div className="border-b border-border px-4 py-3 text-sm font-medium">Team activity</div>
-            <ul className="divide-y divide-border">
-              {ACTIVITY.map((a, i) => {
-                const author = authorById(a.who);
-                return (
-                  <li key={i} className="flex items-start gap-3 px-4 py-3">
-                    <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-muted text-[11px] font-medium">
-                      {author.initials}
-                    </div>
-                    <div className="min-w-0 flex-1 text-sm">
-                      <span className="font-medium">{author.name}</span>{" "}
-                      <span className="text-muted-foreground">{a.what}</span>{" "}
-                      <span className="font-medium">{a.target}</span>
-                    </div>
-                    <div className="shrink-0 text-xs text-muted-foreground">{a.when}</div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          {/* Recently uploaded media */}
-          <div className="surface-card">
-            <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <ImageIcon className="h-4 w-4 text-primary" /> Media
-              </div>
-              <Link to="/media" className="text-xs text-muted-foreground hover:text-foreground">Open library</Link>
-            </div>
-            <div className="grid grid-cols-3 gap-2 p-3">
-              {MEDIA.slice(0, 6).map((m) => (
-                <div key={m.id} className="aspect-square overflow-hidden rounded-md border border-border">
-                  <img src={m.url} alt={m.name} className="h-full w-full object-cover" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
         {/* Quick actions */}
         <div className="surface-card p-4">
           <div className="mono-label mb-3 flex items-center gap-2">
             <Clock className="h-3.5 w-3.5" /> Quick actions
           </div>
           <div className="flex flex-wrap gap-2">
-            {[
-              { label: "New article", to: "/blog" },
-              { label: "New landing page", to: "/landing" },
-              { label: "Upload media", to: "/media" },
-              { label: "Create redirect", to: "/redirects" },
-              { label: "Fix SEO issue", to: "/seo" },
-              { label: "Draft changelog", to: "/changelog" },
-            ].map((a) => (
-              <Link key={a.label} to={a.to} className="rounded-md border border-border bg-card px-3 py-1.5 text-xs hover:bg-muted">
-                {a.label}
-              </Link>
-            ))}
+            <Link to="/blog/$id" params={{ id: "new" }} className="rounded-md border border-border bg-card px-3 py-1.5 text-xs hover:bg-muted">
+              New article
+            </Link>
+            <Link to="/taxonomy" className="rounded-md border border-border bg-card px-3 py-1.5 text-xs hover:bg-muted">
+              Manage taxonomy
+            </Link>
+            <Link to="/media" className="rounded-md border border-border bg-card px-3 py-1.5 text-xs hover:bg-muted">
+              Media library
+            </Link>
+            <span className="rounded-md border border-border bg-muted px-3 py-1.5 text-xs text-muted-foreground">
+              New landing page — Coming Soon
+            </span>
+            <span className="rounded-md border border-border bg-muted px-3 py-1.5 text-xs text-muted-foreground">
+              Create redirect — Coming Soon
+            </span>
+            <span className="rounded-md border border-border bg-muted px-3 py-1.5 text-xs text-muted-foreground">
+              Draft changelog — Coming Soon
+            </span>
           </div>
-        </div>
-
-        {/* Draft list */}
-        <div className="surface-card">
-          <div className="flex items-center justify-between border-b border-border px-4 py-3 text-sm font-medium">
-            Drafts in progress
-            <Link to="/blog" className="text-xs font-normal text-muted-foreground hover:text-foreground">Open blog</Link>
-          </div>
-          <ul className="divide-y divide-border">
-            {drafts.map((a) => (
-              <li key={a.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 px-4 py-3">
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-medium">{a.title}</div>
-                  <div className="mt-0.5 truncate text-xs text-muted-foreground">
-                    {authorById(a.author).name} · updated {new Date(a.updatedAt).toLocaleDateString()}
-                  </div>
-                </div>
-                <StatusBadge status={a.status} />
-                <Link to="/blog/$id" params={{ id: a.id }} className="rounded-md border border-border bg-card px-2.5 py-1 text-xs hover:bg-muted">
-                  Continue
-                </Link>
-              </li>
-            ))}
-          </ul>
         </div>
       </PageBody>
     </>

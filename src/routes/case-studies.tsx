@@ -9,13 +9,22 @@ export const Route = createFileRoute("/case-studies")({
     ],
   }),
   component: () => (
-    <ContentList
-      eyebrow="Publishing · Case Studies"
-      title="Case studies & success stories"
-      description="Real farms using FIRMA — surfaced on firma.farm/case-studies."
-      ctaLabel="New case study"
-      items={ITEMS}
-    />
+    <>
+      <div className="surface-card mb-4 flex items-center gap-3 px-4 py-2.5">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+          Coming Soon
+        </span>
+        <span className="text-sm text-muted-foreground">This module is part of the FIRMA Studio roadmap. The UI below is a preview.</span>
+      </div>
+      <ContentList
+        eyebrow="Publishing · Case Studies"
+        title="Case studies & success stories"
+        description="Real farms using FIRMA — surfaced on firma.farm/case-studies."
+        ctaLabel="New case study"
+        items={ITEMS}
+      />
+    </>
   ),
 });
 

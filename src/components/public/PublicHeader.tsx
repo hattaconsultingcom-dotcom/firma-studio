@@ -2,8 +2,12 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
-const NAV: { label: string; to?: "/journal"; href?: string }[] = [
-  { label: "Journal", to: "/journal" as const },
+type NavEntry =
+  | { label: string; to: "/journal"; href?: undefined }
+  | { label: string; to?: undefined; href: string };
+
+const NAV: NavEntry[] = [
+  { label: "Journal", to: "/journal" },
   { label: "Resources", href: "/journal/resources" },
   { label: "Academy", href: "/journal/academy" },
   { label: "Case Studies", href: "/journal/case-studies" },
@@ -26,7 +30,7 @@ export function PublicHeader() {
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm">
           {NAV.map((n) =>
-            "to" in n ? (
+            n.to ? (
               <Link
                 key={n.label}
                 to={n.to}
@@ -68,7 +72,7 @@ export function PublicHeader() {
         <div className="md:hidden border-t border-border bg-background">
           <div className="mx-auto max-w-[1240px] px-5 py-4 flex flex-col gap-3 text-sm">
             {NAV.map((n) =>
-              "to" in n ? (
+              n.to ? (
                 <Link key={n.label} to={n.to} onClick={() => setOpen(false)} className="py-1">
                   {n.label}
                 </Link>
