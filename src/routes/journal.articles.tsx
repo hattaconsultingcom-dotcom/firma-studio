@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
-import { Clock, Search, Loader2, AlertCircle, FileText } from "lucide-react";
+import { Clock, Search, Loader as Loader2, CircleAlert as AlertCircle, FileText } from "lucide-react";
 import { PublicHeader } from "@/components/public/PublicHeader";
 import { PublicFooter } from "@/components/public/PublicFooter";
 import { NewsletterCTA, FirmaCTA } from "@/components/public/NewsletterCTA";

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Clock, Share2, Loader2, FileText } from "lucide-react";
+import { ArrowLeft, Clock, Share2, Loader as Loader2, FileText } from "lucide-react";
 import { PublicHeader } from "@/components/public/PublicHeader";
 import { PublicFooter } from "@/components/public/PublicFooter";
 import { NewsletterCTA, FirmaCTA } from "@/components/public/NewsletterCTA";

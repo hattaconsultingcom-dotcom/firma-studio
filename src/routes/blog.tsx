@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageBody, PageHeader } from "@/components/studio/PageHeader";
 import { StatusBadge } from "@/components/studio/StatusBadge";
 import { supabase, type ArticleStatus, type ArticleWithRelations } from "@/lib/supabase";
-import { Filter, Plus, Search as SearchIcon, MoreHorizontal, ArrowUpDown, Loader2, AlertCircle, FileText } from "lucide-react";
+import { ListFilter as Filter, Plus, Search as SearchIcon, MoveHorizontal as MoreHorizontal, ArrowUpDown, Loader as Loader2, CircleAlert as AlertCircle, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export const Route = createFileRoute("/blog")({

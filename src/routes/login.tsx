@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { StudioLogo } from "@/components/studio/Logo";
-import { Loader2, Lock, Mail, User as UserIcon, AlertCircle } from "lucide-react";
+import { Loader as Loader2, Lock, Mail, User as UserIcon, CircleAlert as AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   head: () => ({

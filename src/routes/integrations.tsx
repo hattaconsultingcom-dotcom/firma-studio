@@ -1,10 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageBody, PageHeader } from "@/components/studio/PageHeader";
 import { useMemo, useState } from "react";
-import {
-  Search, Settings2, Plug, CheckCircle2, Circle, Filter, ArrowUpDown,
-  BarChart3, Megaphone, Mail, Workflow, Users, Sparkles,
-} from "lucide-react";
+import { Search, Settings2, Plug, CircleCheck as CheckCircle2, Circle, ListFilter as Filter, ArrowUpDown, ChartBar as BarChart3, Megaphone, Mail, Workflow, Users, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export const Route = createFileRoute("/integrations")({

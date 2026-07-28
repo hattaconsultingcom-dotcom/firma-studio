@@ -3,7 +3,7 @@ import { PageBody, PageHeader } from "@/components/studio/PageHeader";
 import { StatusBadge } from "@/components/studio/StatusBadge";
 import { ACTIVITY, TOP_PAGES, SEO_ISSUES, MEDIA, authorById } from "@/lib/mock";
 import { supabase, type ArticleWithRelations } from "@/lib/supabase";
-import { ArrowUpRight, AlertTriangle, Calendar, Clock, Sparkles, Plus, FileText, Image as ImageIcon, Search, Loader2 } from "lucide-react";
+import { ArrowUpRight, TriangleAlert as AlertTriangle, Calendar, Clock, Sparkles, Plus, FileText, Image as ImageIcon, Search, Loader as Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export const Route = createFileRoute("/")({

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageBody, PageHeader } from "@/components/studio/PageHeader";
 import { SEO_ISSUES } from "@/lib/mock";
-import { AlertTriangle, CheckCircle2, XCircle, Search, Sparkles, ExternalLink, RefreshCw } from "lucide-react";
+import { TriangleAlert as AlertTriangle, CircleCheck as CheckCircle2, Circle as XCircle, Search, Sparkles, ExternalLink, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/seo")({

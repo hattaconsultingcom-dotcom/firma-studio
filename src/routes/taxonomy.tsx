@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageBody, PageHeader } from "@/components/studio/PageHeader";
 import { supabase, type AuthorRow, type CategoryRow, type TagRow } from "@/lib/supabase";
-import { Plus, Tags, Users, Layers, Loader2, Trash2 } from "lucide-react";
+import { Plus, Tags, Users, Layers, Loader as Loader2, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export const Route = createFileRoute("/taxonomy")({

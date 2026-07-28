@@ -15,7 +15,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Shell } from "../components/studio/Shell";
 import { AuthProvider, useAuth } from "../lib/auth";
-import { Loader2 } from "lucide-react";
+import { Loader as Loader2 } from "lucide-react";
 
 const PRIVATE_PREFIXES = [
   "/architecture",

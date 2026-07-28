@@ -1,9 +1,5 @@
 import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
-import {
-  ChevronLeft, Eye, Save, MoreHorizontal, Trash2, Send, Archive, RotateCcw,
-  Bold, Italic, Heading1, Heading2, List, ListOrdered, Quote, Code,
-  Image as ImageIcon, Link2, Table as TableIcon, Upload, Loader2, AlertCircle, X,
-} from "lucide-react";
+import { ChevronLeft, Eye, Save, MoveHorizontal as MoreHorizontal, Trash2, Send, Archive, RotateCcw, Bold, Italic, Heading1, Heading2, List, ListOrdered, Quote, Code, Image as ImageIcon, Link2, Table as TableIcon, Upload, Loader as Loader2, CircleAlert as AlertCircle, X } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { supabase, slugify, calculateReadingTime, type ArticleStatus, type AuthorRow, type CategoryRow, type TagRow } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";

@@ -1,11 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import {
-  LayoutDashboard, Globe, LayoutTemplate, Newspaper, BookOpen, FileText,
-  GraduationCap, Sparkles, Copy, LifeBuoy, GitBranch, Mail, Search, LineChart,
-  Image as ImageIcon, ArrowRightLeft, Tags, Users, Settings, ChevronsLeft, Blocks,
-  ChevronsRight, Command, Plus, Bell, Menu, X, Plug, LogOut,
-} from "lucide-react";
+import { LayoutDashboard, Globe, LayoutTemplate, Newspaper, BookOpen, FileText, GraduationCap, Sparkles, Copy, LifeBuoy, GitBranch, Mail, Search, ChartLine as LineChart, Image as ImageIcon, ArrowRightLeft, Tags, Users, Settings, ChevronsLeft, Blocks, ChevronsRight, Command, Plus, Bell, Menu, X, Plug, LogOut } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { StudioLogo } from "./Logo";
 import { useAuth } from "@/lib/auth";
